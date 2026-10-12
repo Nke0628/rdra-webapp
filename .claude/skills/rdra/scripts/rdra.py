@@ -625,14 +625,15 @@ def diagram_context(m, sysname):
     hyps = []
     for a, r in m.actors.items():
         n = ids("a", a)
-        b.append(f"  {n}[{ql('👤 ' + a)}] --- sys")
+        b.append(f"  {n}[{kl('アクター', a)}] --- sys")
         if is_hyp(r):
             hyps.append(n)
     for e, r in m.exts.items():
         n = ids("e", e)
-        b.append(f"  sys --- {n}[[{ql(e)}]]")
+        b.append(f"  sys --- {n}[[{kl('外部システム', e)}]]")
         if is_hyp(r):
             hyps.append(n)
+    b += kind_classes(ids)
     b.append("  " + HYP_STYLE)
     if hyps:
         b.append(f"  class {','.join(hyps)} hyp")
@@ -699,9 +700,10 @@ def diagram_business_context(m):
     for kind, w, bn, hyp in links:
         arrow = "-.-" if hyp else "---"
         if kind == "a":
-            b.append(f"  {ids('a', w)}[{ql('👤 ' + w)}] {arrow} {bn}")
+            b.append(f"  {ids('a', w)}[{kl('アクター', w)}] {arrow} {bn}")
         else:
-            b.append(f"  {bn} {arrow} {ids('e', w)}[[{ql(w)}]]")
+            b.append(f"  {bn} {arrow} {ids('e', w)}[[{kl('外部システム', w)}]]")
+    b += kind_classes(ids)
     b.append("  " + HYP_STYLE)
     if hyps:
         b.append(f"  class {','.join(hyps)} hyp")

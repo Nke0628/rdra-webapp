@@ -7,14 +7,18 @@
 ```mermaid
 flowchart LR
   sys(["rdra-webapp"])
-  a1["👤 顧客"] --- sys
-  a2["👤 営業"] --- sys
-  a3["👤 オーダー部門"] --- sys
-  a4["👤 物流"] --- sys
-  a5["👤 経営者"] --- sys
-  sys --- e6[["決済システム"]]
-  sys --- e7[["出荷システム"]]
-  sys --- e8[["入荷システム"]]
+  a1["<small>アクター</small><br/>顧客"] --- sys
+  a2["<small>アクター</small><br/>営業"] --- sys
+  a3["<small>アクター</small><br/>オーダー部門"] --- sys
+  a4["<small>アクター</small><br/>物流"] --- sys
+  a5["<small>アクター</small><br/>経営者"] --- sys
+  sys --- e6[["<small>外部システム</small><br/>決済システム"]]
+  sys --- e7[["<small>外部システム</small><br/>出荷システム"]]
+  sys --- e8[["<small>外部システム</small><br/>入荷システム"]]
+  classDef kActor fill:#e6eefa,stroke:#3b6fb6
+  classDef kExt fill:#efe8f8,stroke:#7a52b3
+  class a1,a2,a3,a4,a5 kActor
+  class e6,e7,e8 kExt
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
@@ -171,35 +175,39 @@ flowchart LR
     b27(["レビュー・感想を投稿する"])
     b28(["レビュー・感想を集計し商品開発に使う"])
   end
-  a29["👤 顧客"] -.- b2
-  a29["👤 顧客"] --- b4
-  a30["👤 オーダー部門"] --- b5
-  a29["👤 顧客"] --- b6
-  a30["👤 オーダー部門"] --- b6
-  b6 --- e31[["決済システム"]]
-  b6 --- e32[["出荷システム"]]
-  a30["👤 オーダー部門"] --- b7
-  b7 --- e33[["入荷システム"]]
-  b7 --- e32[["出荷システム"]]
-  a30["👤 オーダー部門"] --- b8
-  a29["👤 顧客"] --- b9
-  a30["👤 オーダー部門"] -.- b9
-  a30["👤 オーダー部門"] --- b10
-  a30["👤 オーダー部門"] --- b11
-  a34["👤 物流"] -.- b11
-  a34["👤 物流"] --- b13
-  b13 --- e32[["出荷システム"]]
-  a30["👤 オーダー部門"] --- b15
-  a35["👤 営業"] --- b16
-  a34["👤 物流"] --- b17
-  b17 --- e33[["入荷システム"]]
-  a35["👤 営業"] --- b19
-  a35["👤 営業"] --- b20
-  a35["👤 営業"] --- b21
-  a35["👤 営業"] --- b23
-  a36["👤 経営者"] -.- b25
-  a29["👤 顧客"] --- b27
-  a35["👤 営業"] --- b28
+  a29["<small>アクター</small><br/>顧客"] -.- b2
+  a29["<small>アクター</small><br/>顧客"] --- b4
+  a30["<small>アクター</small><br/>オーダー部門"] --- b5
+  a29["<small>アクター</small><br/>顧客"] --- b6
+  a30["<small>アクター</small><br/>オーダー部門"] --- b6
+  b6 --- e31[["<small>外部システム</small><br/>決済システム"]]
+  b6 --- e32[["<small>外部システム</small><br/>出荷システム"]]
+  a30["<small>アクター</small><br/>オーダー部門"] --- b7
+  b7 --- e33[["<small>外部システム</small><br/>入荷システム"]]
+  b7 --- e32[["<small>外部システム</small><br/>出荷システム"]]
+  a30["<small>アクター</small><br/>オーダー部門"] --- b8
+  a29["<small>アクター</small><br/>顧客"] --- b9
+  a30["<small>アクター</small><br/>オーダー部門"] -.- b9
+  a30["<small>アクター</small><br/>オーダー部門"] --- b10
+  a30["<small>アクター</small><br/>オーダー部門"] --- b11
+  a34["<small>アクター</small><br/>物流"] -.- b11
+  a34["<small>アクター</small><br/>物流"] --- b13
+  b13 --- e32[["<small>外部システム</small><br/>出荷システム"]]
+  a30["<small>アクター</small><br/>オーダー部門"] --- b15
+  a35["<small>アクター</small><br/>営業"] --- b16
+  a34["<small>アクター</small><br/>物流"] --- b17
+  b17 --- e33[["<small>外部システム</small><br/>入荷システム"]]
+  a35["<small>アクター</small><br/>営業"] --- b19
+  a35["<small>アクター</small><br/>営業"] --- b20
+  a35["<small>アクター</small><br/>営業"] --- b21
+  a35["<small>アクター</small><br/>営業"] --- b23
+  a36["<small>アクター</small><br/>経営者"] -.- b25
+  a29["<small>アクター</small><br/>顧客"] --- b27
+  a35["<small>アクター</small><br/>営業"] --- b28
+  classDef kActor fill:#e6eefa,stroke:#3b6fb6
+  classDef kExt fill:#efe8f8,stroke:#7a52b3
+  class a29,a30,a34,a35,a36 kActor
+  class e31,e32,e33 kExt
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
   class b2,b25 hyp
 ```
