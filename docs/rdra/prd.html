@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>rdra-webapp 要件定義書</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Shippori+Mincho+B1:wght@600;800&display=swap">
+<style>
+  /* 左に目次、右に本文。会議で画面共有して上から順に読み合わせる資料 */
+  :root {
+    --paper: #f5f7f6; --surface: #ffffff; --ink: #18232e; --muted: #5a6773; --line: #d7dfe1;
+    --accent: #0d6b67; --accent-soft: #e2f0ee;
+    --ok: #256b43; --ok-bg: #e3f1e8; --hyp: #8a5200; --hyp-bg: #fbeed6;
+    --src: #3f5a74; --src-bg: #e6edf4; --high: #a8291f; --high-bg: #fbe6e3; --mid: #8a5200; --mid-bg: #fbeed6;
+    --k-actor: #3b6fb6; --k-actor-bg: #e6eefa; --k-screen: #2a8199; --k-screen-bg: #e3f3f6;
+    --k-uc: #0d6b67; --k-uc-bg: #e2f0ee; --k-ext: #7a52b3; --k-ext-bg: #efe8f8;
+    --k-info: #a87410; --k-info-bg: #fbf1d9; --k-cond: #b54a5e; --k-cond-bg: #fbe7ea; --k-state: #5a6773; --k-state-bg: #ebedf0;
+    --display: "Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #10171c; --surface: #172027; --ink: #e4eaee; --muted: #98a6b1; --line: #29353f;
+      --accent: #56c2b8; --accent-soft: #15302e;
+      --ok: #82cfa0; --ok-bg: #173022; --hyp: #f0b860; --hyp-bg: #33270f;
+      --src: #a5bdd4; --src-bg: #1c2935; --high: #f4938a; --high-bg: #3a1d1a; --mid: #f0b860; --mid-bg: #33270f;
+      --k-actor: #7fa8e6; --k-actor-bg: #172640; --k-screen: #5cc0d6; --k-screen-bg: #12303a;
+      --k-uc: #56c2b8; --k-uc-bg: #15302e; --k-ext: #b597e6; --k-ext-bg: #261d3a;
+      --k-info: #e3b55c; --k-info-bg: #33280f; --k-cond: #ef93a5; --k-cond-bg: #3a1a22; --k-state: #98a6b1; --k-state-bg: #222b33;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10171c; --surface: #172027; --ink: #e4eaee; --muted: #98a6b1; --line: #29353f;
+    --accent: #56c2b8; --accent-soft: #15302e;
+    --ok: #82cfa0; --ok-bg: #173022; --hyp: #f0b860; --hyp-bg: #33270f;
+    --src: #a5bdd4; --src-bg: #1c2935; --high: #f4938a; --high-bg: #3a1d1a; --mid: #f0b860; --mid-bg: #33270f;
+    --k-actor: #7fa8e6; --k-actor-bg: #172640; --k-screen: #5cc0d6; --k-screen-bg: #12303a;
+    --k-uc: #56c2b8; --k-uc-bg: #15302e; --k-ext: #b597e6; --k-ext-bg: #261d3a;
+    --k-info: #e3b55c; --k-info-bg: #33280f; --k-cond: #ef93a5; --k-cond-bg: #3a1a22; --k-state: #98a6b1; --k-state-bg: #222b33;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.75 var(--body); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding-inline: 16px; padding-block: 32px 80px;
+    display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 40px; }
+  nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start;
+    display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+  nav.toc a { color: var(--muted); text-decoration: none; padding: 5px 10px; border-left: 2px solid var(--line); }
+  nav.toc a:hover, nav.toc a:focus-visible { color: var(--accent); border-left-color: var(--accent); outline: none; }
+  main { min-width: 0; max-width: 820px; }
+  .eyebrow { font-size: 12px; letter-spacing: .08em; color: var(--accent); font-weight: 700; }
+  h1 { font-family: var(--display); font-weight: 800; font-size: 40px; line-height: 1.2; margin: 6px 0 4px; text-wrap: balance; }
+  .meta { color: var(--muted); font-size: 13px; }
+  .stats { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .stats span { display: inline-flex; align-items: baseline; gap: 6px; padding: 6px 12px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 6px; font-size: 13px; color: var(--muted); }
+  .stats b { font-size: 18px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .stats .warn b { color: var(--hyp); }
+  details.guide { margin-top: 14px; font-size: 13px; }
+  details.guide summary { cursor: pointer; color: var(--accent); }
+  details.guide dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 10px 0 0;
+    padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+  details.guide dt { font-weight: 700; display: flex; gap: 4px; align-items: center; }
+  details.guide dd { margin: 0; color: var(--muted); }
+  section { margin-top: 48px; scroll-margin-top: 16px; }
+  h2 { font-family: var(--display); font-weight: 800; font-size: 25px; margin: 0 0 6px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--ink); text-wrap: balance; }
+  h3 { font-size: 16px; margin: 26px 0 10px; display: flex; align-items: baseline; gap: 8px; }
+  .lead { color: var(--muted); font-size: 14px; margin: 8px 0 16px; }
+  .kind { font-size: 11px; font-weight: 400; color: var(--muted); letter-spacing: .06em; }
+  .quote { border-left: 3px solid var(--accent); background: var(--surface); padding: 12px 16px; margin: 12px 0; }
+  .quote p { margin: 2px 0; }
+  .qlabel { font-size: 12px; color: var(--accent); font-weight: 700; letter-spacing: .06em; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; min-width: 0; }
+  .card p { margin: 6px 0; }
+  .card-h, .step-h, .rtitle, .oq-h { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .badge { font-size: 11px; padding: 1px 7px; border-radius: 999px; white-space: nowrap; line-height: 1.7; }
+  .badge.ok { background: var(--ok-bg); color: var(--ok); }
+  .badge.hyp { background: var(--hyp-bg); color: var(--hyp); font-weight: 700; }
+  .badge.src { background: var(--src-bg); color: var(--src); }
+  .chip { display: inline-block; font-size: 12px; padding: 1px 8px; margin: 2px 4px 2px 0; border: 1px solid var(--line);
+    border-radius: 4px; background: var(--surface); }
+  .chip.who { background: var(--accent-soft); border-color: transparent; color: var(--accent); font-weight: 700; }
+  .chip.req { font-family: var(--mono); font-size: 11px; }
+  .qref { font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent); }
+  .sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .none { color: var(--muted); font-size: 13px; }
+  ul.reqs { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  ul.reqs li { display: flex; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+  .rid { font-family: var(--mono); font-size: 12px; color: var(--muted); padding-top: 2px; min-width: 3.2em; }
+  .rbody { min-width: 0; }
+  .rtitle { font-weight: 700; }
+  .rdesc { color: var(--muted); font-size: 13.5px; }
+  .flow { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
+  .flow-h { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; font-size: 15.5px; }
+  ol.steps { list-style: none; counter-reset: s; padding: 0; margin: 12px 0 0; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 0 0 14px 38px; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--ink); color: var(--paper); font-size: 12px; display: grid; place-items: center; font-variant-numeric: tabular-nums; }
+  ol.steps > li:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 28px; bottom: 2px; width: 2px; background: var(--line); }
+  .step-name { font-weight: 700; }
+  .tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; color: var(--muted); font-weight: 700; background: var(--paper); }
+  tr:last-child td { border-bottom: 0; }
+  td.nowrap { white-space: nowrap; }
+  ul.rels, ul.trans { padding-left: 20px; margin: 8px 0; }
+  .mult { font-size: 12px; color: var(--muted); }
+  .cond-tbl { margin-top: 8px; }
+  .cond-tbl tbody th { background: var(--paper); white-space: nowrap; }
+  .states { display: flex; flex-wrap: wrap; gap: 8px; }
+  .state { display: inline-flex; gap: 6px; align-items: center; padding: 6px 12px; border: 1.5px solid var(--ink); border-radius: 999px; background: var(--surface); font-weight: 700; }
+  ul.decisions { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--line); }
+  ul.decisions li { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 16px; }
+  .dq { font-size: 13.5px; }
+  .da { font-weight: 700; color: var(--ok); font-size: 13.5px; }
+  .qid { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-right: 8px; }
+  .oq { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; scroll-margin-top: 16px; }
+  .pri { font-size: 11px; padding: 1px 8px; border-radius: 4px; font-weight: 700; }
+  .pri.high { background: var(--high-bg); color: var(--high); }
+  .pri.mid { background: var(--mid-bg); color: var(--mid); }
+  .pri.low { background: var(--src-bg); color: var(--src); }
+  .oq dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 13.5px; margin: 10px 0; }
+  .oq dt { color: var(--muted); }
+  .oq dd { margin: 0; }
+  ol.choices { font-size: 13.5px; margin: 0; padding-left: 20px; list-style: none; }
+  .memo { margin-top: 10px; display: flex; gap: 8px; align-items: flex-start; }
+  .memo label { font-size: 11px; color: var(--muted); padding-top: 7px; white-space: nowrap; }
+  .memo textarea { flex: 1; min-width: 0; font: inherit; font-size: 13.5px; color: var(--ink); background: var(--paper);
+    border: 1px dashed var(--line); border-radius: 6px; padding: 6px 10px; resize: vertical; min-height: 34px; }
+  .memo textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-style: solid; }
+  .memo textarea.filled { border-style: solid; border-color: var(--accent); background: var(--surface); }
+  .mbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button { font: inherit; font-size: 14px; padding: 8px 16px; border-radius: 6px; border: 1px solid var(--accent);
+    background: var(--accent); color: var(--paper); cursor: pointer; font-weight: 700; }
+  button.ghost { background: transparent; color: var(--muted); border-color: var(--line); font-weight: 400; }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+  #msg { font-size: 13px; color: var(--ok); }
+  pre.out { white-space: pre-wrap; font-family: var(--mono); font-size: 12.5px; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-height: 60px; overflow-x: auto; }
+  code { font-family: var(--mono); font-size: 12.5px; }
+  figure.dg { margin: 12px 0 16px; padding: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; overflow-x: auto; }
+  .flow figure.dg { border: 0; padding: 4px 0; margin: 8px 0; }
+  figure.dg pre.mermaid { margin: 0; text-align: center; font-family: var(--body); font-size: 12px; color: var(--muted); white-space: pre-wrap; }
+  figure.dg svg { max-width: 100%; height: auto; }
+  /* UC複合図で中身を見られる要素(情報・条件・状態モデル)と、その中身を出す小窓 */
+  figure.dg .node.has-detail { cursor: pointer; }
+  figure.dg .node.has-detail:hover > :not(.label), figure.dg .node.has-detail:focus-visible > :not(.label) { stroke-width: 2.5px !important; }
+  figure.dg .node.has-detail:focus { outline: none; }
+  dialog.dg-pop { width: min(560px, calc(100vw - 32px)); max-height: min(80vh, 640px); padding: 0; border: 1px solid var(--line); border-radius: 10px;
+    background: var(--surface); color: var(--ink); box-shadow: 0 12px 40px rgba(0,0,0,.25); }
+  dialog.dg-pop[open] { display: flex; flex-direction: column; }
+  dialog.dg-pop .pop-close:focus:not(:focus-visible) { outline: none; }
+  dialog.dg-pop::backdrop { background: rgba(10, 16, 20, .35); }
+  dialog.dg-pop .pop-h { display: flex; align-items: center; gap: 8px; padding: 14px 16px 10px; border-bottom: 1px solid var(--line); }
+  dialog.dg-pop .pop-kind { font-size: 12px; color: var(--muted); }
+  dialog.dg-pop .pop-title { font-weight: 700; font-size: 16px; flex: 1; }
+  dialog.dg-pop .pop-close { border: 0; background: none; color: var(--muted); font-size: 20px; line-height: 1; cursor: pointer; padding: 4px 6px; }
+  dialog.dg-pop .pop-b { padding: 12px 16px 16px; font-size: 14px; overflow-y: auto; }
+  dialog.dg-pop dl { display: grid; grid-template-columns: max-content 1fr; gap: 8px 14px; margin: 0; }
+  dialog.dg-pop dt { color: var(--muted); font-size: 13px; }
+  dialog.dg-pop dd { margin: 0; }
+  dialog.dg-pop ul.trans { margin: 0; padding-left: 18px; }
+  @media (max-width: 520px) { dialog.dg-pop dl { grid-template-columns: 1fr; } dialog.dg-pop dd { margin-bottom: 4px; } }
+  /* UC複合図の種類ごとの色。図の記述の色(明るい色だけ)ではなく、ここで両方のテーマに合わせて塗る */
+  figure.dg .node.kActor > :not(.label) { fill: var(--k-actor-bg) !important; stroke: var(--k-actor) !important; }
+  figure.dg .node.kScreen > :not(.label) { fill: var(--k-screen-bg) !important; stroke: var(--k-screen) !important; }
+  figure.dg .node.kUc > :not(.label) { fill: var(--k-uc-bg) !important; stroke: var(--k-uc) !important; }
+  figure.dg .node.kExt > :not(.label) { fill: var(--k-ext-bg) !important; stroke: var(--k-ext) !important; }
+  figure.dg .node.kInfo > :not(.label) { fill: var(--k-info-bg) !important; stroke: var(--k-info) !important; }
+  figure.dg .node.kCond > :not(.label) { fill: var(--k-cond-bg) !important; stroke: var(--k-cond) !important; }
+  figure.dg .node.kState > :not(.label) { fill: var(--k-state-bg) !important; stroke: var(--k-state) !important; }
+  figure.dg figcaption { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  details.more { margin-top: 6px; }
+  details.more > summary { cursor: pointer; font-size: 13px; color: var(--accent); }
+  details.more ol.steps, details.more ul.trans { margin-top: 10px; }
+  @media (max-width: 860px) {
+    .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; padding-block: 20px 60px; }
+    nav.toc { position: static; flex-direction: row; flex-wrap: wrap; gap: 4px; margin-bottom: 20px; }
+    nav.toc a { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; }
+    h1 { font-size: 30px; }
+    ul.decisions li { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav class="toc" aria-label="目次"><a href="#purpose">目的と背景</a><a href="#people">アクターと外部システム</a><a href="#reqs">要求</a><a href="#flows">BUC</a><a href="#info">情報</a><a href="#states">状態遷移</a><a href="#decided">これまでに決まったこと</a><a href="#open">議論したいこと</a><a href="#minutes">議事メモ</a></nav>
+<main>
+<header class="top"><div class="eyebrow">要件定義書(PRD)</div><h1>rdra-webapp</h1><div class="meta">2026年10月12日 10:44 時点</div><div class="stats"><span class="warn"><b>9</b>確認が必要なAIの仮説</span><span class="warn"><b>15</b>未解決の質問</span></div><details class="guide"><summary>この資料の読み方</summary><dl><dt>BUC(ビジネスユースケース)</dt><dd>一連の仕事の流れ(例: 利用を始める)。アクティビティを順番に並べたもの</dd><dt>アクティビティ</dt><dd>BUCの中の一つひとつの作業</dd><dt>UC(ユースケース)</dt><dd>アクティビティの中で、システムを使う部分</dd><dt>コンテキスト</dt><dd>役割の近い情報をまとめた単位</dd><dt>条件</dt><dd>UCがどう動くかを決めるビジネスルール</dd><dt>バリエーション</dt><dd>条件で使う種類・区分と、その値</dd></dl></details></header>
+<section id="purpose"><h2>目的と背景</h2><h3>ゴール</h3><ul class="reqs"><li><span class="rid">G-01</span><div class="rbody"><div class="rtitle">輸入した商品をタイムリーに紹介し、Web で顧客に直接販売する</div><div class="rdesc">直営店での小売りに加え、はじめての通信販売を始める</div></div></li><li><span class="rid">G-02</span><div class="rbody"><div class="rtitle">顧客と直接つながり、商品に対する顧客の声をダイレクトに把握して商品開発につなげる</div><div class="rdesc">顧客のレビュー・感想を営業が集計して使う</div></div></li></ul><h3>初期要望</h3><div class="quote"><div class="qlabel">いちばん実現したいこと</div><p>輸入した商品をタイムリーに紹介し直接販売する。顧客と直接つながることで商品に対する顧客の声をダイレクトに把握し商品開発につなげる。</p></div><div class="quote"><div class="qlabel">背景</div><p>ABC商事は輸入販売の商社で、従来は直営店を数十店持ち、そこで小売りを行っている。新たに Web を使った通信販売を始める。通信販売はこの会社にとってはじめて。システム部門が中心となり、関係部署へのヒアリングで要望をまとめる。関係する部署: 顧客、経営者、営業、オーダー部門、物流、システム部門経営者は売上の状況を見る。システム部門はこのシステムの利用者ではない(保守のみ)。関係する既存システム: 入荷システム、出荷システム、決済システム経営層は、営業にはオーダー作業よりも戦略的な商品管理の仕事にシフトしてもらいたい。オーダー処理は新たにオーダー部門を用意して集約する。営業は、多様な顧客のニーズに沿えるように入金手段を多くしてほしい。物流は、既存の入庫、出庫システムとの連動を望んでいる。入庫、出庫システムは入荷システム、出荷システムと同じもの。システム部門は、保守性を考え使用する技術を統一したい。決済システム: 入金情報を通知する(決済会社の決めたフォーマットで Web サービスを呼び出す)。出荷システム: 出荷指示を受け付け、出荷作業の完了を通知する。入荷システム: 入荷商品の情報を通知する。配送会社が配送終了をメールで通知する。在庫切れのときは取引先に対して発注する。取引先への発注(在庫切れ時の追加発注、新規商品の発注)はこのシステムで記録し、発注先への送付は従来どおりの手段で行う。物流の出荷は朝、昼、夕方の各3時間単位の締め毎に行う。商品の入荷は午後にまとめて送られてくる。</p></div><div class="quote"><div class="qlabel">やらないこと</div><p>直営店での販売・店舗の在庫。直営店と Web の在庫は共有しない。配送会社とのシステム連携(配送終了はオーダー部門がメールを見て完了にする)。</p></div><div class="memo"><label for="memo-purpose">メモ</label><textarea id="memo-purpose" data-key="purpose" data-label="目的と背景" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="people"><h2>アクターと外部システム</h2><figure class="dg"><pre class="mermaid">flowchart LR
+  sys([&quot;rdra-webapp&quot;])
+  a1[&quot;顧客&quot;] --- sys
+  a2[&quot;営業&quot;] --- sys
+  a3[&quot;オーダー部門&quot;] --- sys
+  a4[&quot;物流&quot;] --- sys
+  a5[&quot;経営者&quot;] --- sys
+  sys --- e6[[&quot;決済システム&quot;]]
+  sys --- e7[[&quot;出荷システム&quot;]]
+  sys --- e8[[&quot;入荷システム&quot;]]
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>システムと、使う人・つながる他のシステム</figcaption></figure><h3>アクター</h3><div class="cards"><div class="card"><div class="card-h"><b>顧客</b></div><p>Web で商品を購入する人。会員登録しなくても購入できる</p></div><div class="card"><div class="card-h"><b>営業</b></div><p>取り扱い商品の登録・削除、売上の分析、品揃えの検討、新規商品の発注を行う</p></div><div class="card"><div class="card-h"><b>オーダー部門</b></div><p>オーダー処理を集約して行う(新設)。入金の確認、出荷指示、追加発注、返品の受付を行う</p></div><div class="card"><div class="card-h"><b>物流</b></div><p>出荷作業と入荷情報の入力を行う</p></div><div class="card"><div class="card-h"><b>経営者</b></div><p>売上の状況を見る</p></div></div><h3>外部システム</h3><div class="cards"><div class="card"><div class="card-h"><b>決済システム</b></div><p>入金情報を通知する(決済会社の決めたフォーマットで Web サービスを呼び出す)</p></div><div class="card"><div class="card-h"><b>出荷システム</b></div><p>既存。出荷指示を受け付け、出荷作業の完了を通知する</p></div><div class="card"><div class="card-h"><b>入荷システム</b></div><p>既存。入荷商品の情報を通知する</p></div></div><div class="memo"><label for="memo-people">メモ</label><textarea id="memo-people" data-key="people" data-label="アクターと外部システム" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="reqs"><h2>要求</h2><p class="lead">システムに求めることを「機能」「非機能」「方針」に分けています。</p><h3>機能</h3><p class="lead">システムでできること。画面で入力する、計算する、表示するなど</p><ul class="reqs"><li><span class="rid">R-01</span><div class="rbody"><div class="rtitle">顧客が Web で商品を選び、決済情報と送付先を入力して購入できる</div><div class="rdesc">カートに追加してから購入指示を行う</div></div></li><li><span class="rid">R-02</span><div class="rbody"><div class="rtitle">営業が仕入れた商品を Web の取り扱い商品として登録・削除できる</div><div class="rdesc">輸入した商品をタイムリーに紹介する</div></div></li><li><span class="rid">R-03</span><div class="rbody"><div class="rtitle">顧客がオーダー商品の現在の状態を確認できる</div></div></li><li><span class="rid">R-04</span><div class="rbody"><div class="rtitle">顧客が会員登録できる。会員登録しなくても購入できる</div></div></li><li><span class="rid">R-05</span><div class="rbody"><div class="rtitle">顧客が出荷前のオーダーを Web でキャンセルできる</div></div></li><li><span class="rid">R-06</span><div class="rbody"><div class="rtitle">決済システムの入金情報通知を受けてオーダーと照合し、照合できないもの・金額が異なるものだけオーダー部門が確認する</div></div></li><li><span class="rid">R-07</span><div class="rbody"><div class="rtitle">出荷指示の前にオーダー別の在庫を確認し、在庫切れのオーダーを入荷待ちにする</div></div></li><li><span class="rid">R-08</span><div class="rbody"><div class="rtitle">入荷システムから送られる入荷情報で、入荷待ちのオーダーの入荷待ちを解除する</div></div></li><li><span class="rid">R-09</span><div class="rbody"><div class="rtitle">入金が確認されたオーダーの出荷指示を、そのまま出荷システムへ連携する</div></div></li><li><span class="rid">R-10</span><div class="rbody"><div class="rtitle">取引先への発注(在庫切れ時の追加発注、新規商品の発注)を記録する</div><div class="rdesc">発注先への送付は従来どおりの手段で行う</div></div></li><li><span class="rid">R-11</span><div class="rbody"><div class="rtitle">営業が商品の特性と売れた時期・売れた場所を管理し、売れた場所をマップ上に表示できる</div><div class="rdesc">売れた場所は送付先の地域</div></div></li><li><span class="rid">R-12</span><div class="rbody"><div class="rtitle">売上を週単位で集計し、月単位でも見られる</div><div class="rdesc">営業が週単位で分析し、次週以降の品揃えを検討する</div></div></li><li><span class="rid">R-13</span><div class="rbody"><div class="rtitle">購入した顧客が商品のレビュー・感想を Web で投稿できる</div></div></li><li><span class="rid">R-14</span><div class="rbody"><div class="rtitle">営業が商品ごとにレビュー・感想を集計し、商品開発の検討に使える</div></div></li><li><span class="rid">R-15</span><div class="rbody"><div class="rtitle">営業が、今後追加発注しない在庫商品をマークし、売れ筋商品の在庫量を多くできる</div><div class="rdesc">在庫切れによる機会損失を無くす</div></div></li><li><span class="rid">R-16</span><div class="rbody"><div class="rtitle">経営者が売上の状況を見られる</div></div></li><li><span class="rid">R-17</span><div class="rbody"><div class="rtitle">多様な顧客のニーズに沿えるように、入金手段を多く用意する</div></div></li><li><span class="rid">R-21</span><div class="rbody"><div class="rtitle">オーダーを受理したことと支払い方法を顧客にメールで通知する</div></div></li><li><span class="rid">R-24</span><div class="rbody"><div class="rtitle">オーダー部門が配送会社からの配送終了のメール通知を確認し、オーダーを完了にできる</div><div class="rdesc">配送会社とのシステム連携はしない</div></div></li></ul><h3>非機能</h3><p class="lead">機能をどれだけ快適・安全に使えるか。速さ、使える端末、個人情報の守り方など</p><ul class="reqs"><li><span class="rid">R-19</span><div class="rbody"><div class="rtitle">保守性を考え、使用する技術を統一する</div></div></li></ul><h3>方針</h3><p class="lead">システムの作り方ではなく、事業・運営として決めること。料金、だれ向けのサービスか、データをいつ消すか、制度改正への追従など</p><ul class="reqs"><li><span class="rid">R-18</span><div class="rbody"><div class="rtitle">オーダー処理は新たに用意するオーダー部門に集約し、営業は戦略的な商品管理の仕事にシフトする</div></div></li><li><span class="rid">R-20</span><div class="rbody"><div class="rtitle">直営店と Web の在庫は共有しない。直営店での販売・店舗の在庫は対象外</div></div></li><li><span class="rid">R-22</span><div class="rbody"><div class="rtitle">入金額が不足する場合は差額の追加支払いを依頼し、多すぎる場合は差額を返金する</div><div class="rdesc">オーダー部門が顧客にメール・電話で確認する</div></div></li><li><span class="rid">R-23</span><div class="rbody"><div class="rtitle">返品はオーダー部門がメールもしくは電話で受け付ける</div></div></li><li><span class="rid">R-25</span><div class="rbody"><div class="rtitle">出荷は朝・昼・夕方の各3時間単位の締め毎に行う</div></div></li></ul><div class="memo"><label for="memo-reqs">メモ</label><textarea id="memo-reqs" data-key="reqs" data-label="要求" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="flows"><h2>BUC</h2><p class="lead">最初の図が業務のつながりです。業務ごとに、BUCのつながりの図、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。アクティビティごとの詳細の図では、情報・条件・状態モデルをクリックすると中身が見られます。</p><figure class="dg"><pre class="mermaid">flowchart LR
+  g1[&quot;Webでの商品購入&quot;]
+  g2[&quot;商品管理&quot;]
+  g3[&quot;売上の把握&quot;]
+  g4[&quot;オーダー処理&quot;]
+  g5[&quot;出荷と入荷&quot;]
+  g6[&quot;顧客の声の把握&quot;]
+  g1 --&gt; g2
+  g1 --&gt; g4
+  g1 --&gt; g5
+  g1 --&gt; g6
+  g2 --&gt; g3
+  g2 --&gt; g4
+  g2 --&gt; g5
+  g4 --&gt; g5
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class g3 hyp</pre><figcaption>業務のつながり。矢印は、その業務で用意した情報を矢印の先の業務で使うところ</figcaption></figure><h3>Webでの商品購入</h3><figure class="dg"><pre class="mermaid">flowchart LR
+  subgraph l1[&quot;顧客&quot;]
+    b2([&quot;会員登録する&quot;])
+    b3([&quot;購入する商品を選びカートに追加する&quot;])
+    b4([&quot;購入指示を行い決済情報と送付先の情報を入力する&quot;])
+    b5([&quot;ABC商事からのメールを確認して支払う&quot;])
+    b6([&quot;オーダー商品の状態を確認する&quot;])
+    b7([&quot;出荷前のオーダーをキャンセルする&quot;])
+  end
+  b2 --&gt; b3
+  b3 --&gt; b4
+  b4 --&gt; b5
+  b5 --&gt; b6
+  b6 --&gt; b7
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>会員登録する</b><span class="sub"><span class="chip req">R-04</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;顧客&quot;]
+    act2[&quot;会員情報を登録する&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">会員情報を登録する</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">顧客</span></div></li></ol></details><div class="memo"><label for="memo-buc-会員登録する">メモ</label><textarea id="memo-buc-会員登録する" data-key="buc-会員登録する" data-label="会員登録する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>購入する商品を選びカートに追加する</b><span class="sub"><span class="chip req">R-01</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;顧客&quot;]
+    act2[&quot;購入する商品を選ぶ&quot;]
+    act3[&quot;カートに追加する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">購入する商品を選ぶ</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">商品</span></div></li><li><div class="step-h"><span class="step-name">カートに追加する</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">カート</span><span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-購入する商品を選びカートに追加する">メモ</label><textarea id="memo-buc-購入する商品を選びカートに追加する" data-key="buc-購入する商品を選びカートに追加する" data-label="購入する商品を選びカートに追加する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>購入指示を行い決済情報と送付先の情報を入力する</b><span class="sub"><span class="chip req">R-01</span><span class="chip req">R-17</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;顧客&quot;]
+    act2[&quot;購入指示を行う&quot;]
+    act3[&quot;決済情報と送付先の情報を入力する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">購入指示を行う</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">カート</span><span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">決済情報と送付先の情報を入力する</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span><span class="chip info">顧客</span></div></li></ol></details><div class="memo"><label for="memo-buc-購入指示を行い決済情報と送付先の情報を入力する">メモ</label><textarea id="memo-buc-購入指示を行い決済情報と送付先の情報を入力する" data-key="buc-購入指示を行い決済情報と送付先の情報を入力する" data-label="購入指示を行い決済情報と送付先の情報を入力する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>ABC商事からのメールを確認して支払う</b><span class="sub"><span class="chip req">R-01</span><span class="chip req">R-17</span><span class="chip req">R-21</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;顧客&quot;]
+    act2[&quot;ABC商事からのメールを確認する&quot;]
+    act3[&quot;選択した決済方法に従って支払う&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">ABC商事からのメールを確認する</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">選択した決済方法に従って支払う</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">入金</span></div></li></ol></details><div class="memo"><label for="memo-buc-ABC商事からのメールを確認して支払う">メモ</label><textarea id="memo-buc-ABC商事からのメールを確認して支払う" data-key="buc-ABC商事からのメールを確認して支払う" data-label="ABC商事からのメールを確認して支払う" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>オーダー商品の状態を確認する</b><span class="sub"><span class="chip req">R-03</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;顧客&quot;]
+    act2[&quot;オーダーの状態を確認する&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">オーダーの状態を確認する</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-オーダー商品の状態を確認する">メモ</label><textarea id="memo-buc-オーダー商品の状態を確認する" data-key="buc-オーダー商品の状態を確認する" data-label="オーダー商品の状態を確認する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>出荷前のオーダーをキャンセルする</b><span class="sub"><span class="chip req">R-05</span><span class="chip req">R-22</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;顧客&quot;]
+    act2[&quot;オーダーをキャンセルする&quot;]
+  end
+  subgraph l3[&quot;オーダー部門&quot;]
+    act4[&quot;入金済みの代金を返金する&quot;]
+  end
+  act2 --&gt; act4
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act4 hyp</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">オーダーをキャンセルする</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">入金済みの代金を返金する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">入金</span><span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-出荷前のオーダーをキャンセルする">メモ</label><textarea id="memo-buc-出荷前のオーダーをキャンセルする" data-key="buc-出荷前のオーダーをキャンセルする" data-label="出荷前のオーダーをキャンセルする" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>商品管理</h3><figure class="dg"><pre class="mermaid">flowchart LR
+  subgraph l1[&quot;営業&quot;]
+    b2([&quot;仕入れた商品を取り扱い商品として登録・削除する&quot;])
+    b3([&quot;商品の特性と売れた時期・売れた場所を管理する&quot;])
+    b4([&quot;週単位で売上を分析し品揃えを検討する&quot;])
+    b5([&quot;追加発注しない在庫商品をマークする&quot;])
+    b6([&quot;売れ筋商品の在庫量を多くする&quot;])
+    b7([&quot;新規商品を発注する&quot;])
+  end
+  b2 --&gt; b3
+  b3 --&gt; b4
+  b4 --&gt; b5
+  b5 --&gt; b6
+  b6 --&gt; b7
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>仕入れた商品を取り扱い商品として登録・削除する</b><span class="sub"><span class="chip req">R-02</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;営業&quot;]
+    act2[&quot;取り扱い商品を登録する&quot;]
+    act3[&quot;取り扱い商品を削除する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">取り扱い商品を登録する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">商品</span></div></li><li><div class="step-h"><span class="step-name">取り扱い商品を削除する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-仕入れた商品を取り扱い商品として登録・削除する">メモ</label><textarea id="memo-buc-仕入れた商品を取り扱い商品として登録・削除する" data-key="buc-仕入れた商品を取り扱い商品として登録・削除する" data-label="仕入れた商品を取り扱い商品として登録・削除する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>商品の特性と売れた時期・売れた場所を管理する</b><span class="sub"><span class="chip req">R-11</span><span class="chip req">R-12</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;営業&quot;]
+    act2[&quot;売上を週単位・月単位で集計する&quot;]
+    act3[&quot;売れた場所をマップ上で見る&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">売上を週単位・月単位で集計する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">売上</span><span class="chip info">商品</span></div></li><li><div class="step-h"><span class="step-name">売れた場所をマップ上で見る</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">売上</span></div></li></ol></details><div class="memo"><label for="memo-buc-商品の特性と売れた時期・売れた場所を管理する">メモ</label><textarea id="memo-buc-商品の特性と売れた時期・売れた場所を管理する" data-key="buc-商品の特性と売れた時期・売れた場所を管理する" data-label="商品の特性と売れた時期・売れた場所を管理する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>週単位で売上を分析し品揃えを検討する</b><span class="sub"><span class="chip req">R-12</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;営業&quot;]
+    act2[&quot;売上情報を場所と商品の特性で分析する&quot;]
+    act3[&quot;次週以降の商品の品揃えを検討する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">売上情報を場所と商品の特性で分析する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">売上</span><span class="chip info">商品</span></div></li><li><div class="step-h"><span class="step-name">次週以降の商品の品揃えを検討する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-週単位で売上を分析し品揃えを検討する">メモ</label><textarea id="memo-buc-週単位で売上を分析し品揃えを検討する" data-key="buc-週単位で売上を分析し品揃えを検討する" data-label="週単位で売上を分析し品揃えを検討する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>追加発注しない在庫商品をマークする</b><span class="sub"><span class="chip req">R-15</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;営業&quot;]
+    act2[&quot;今後追加発注しない商品をマークする&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">今後追加発注しない商品をマークする</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">商品</span><span class="chip info">在庫</span></div></li></ol></details><div class="memo"><label for="memo-buc-追加発注しない在庫商品をマークする">メモ</label><textarea id="memo-buc-追加発注しない在庫商品をマークする" data-key="buc-追加発注しない在庫商品をマークする" data-label="追加発注しない在庫商品をマークする" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>売れ筋商品の在庫量を多くする</b><span class="sub"><span class="chip req">R-15</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;営業&quot;]
+    act2[&quot;売れ筋商品の在庫量を多くする&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">売れ筋商品の在庫量を多くする</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">在庫</span><span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-売れ筋商品の在庫量を多くする">メモ</label><textarea id="memo-buc-売れ筋商品の在庫量を多くする" data-key="buc-売れ筋商品の在庫量を多くする" data-label="売れ筋商品の在庫量を多くする" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>新規商品を発注する</b><span class="sub"><span class="chip req">R-10</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;営業&quot;]
+    act2[&quot;取引先に新規商品を発注する&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">取引先に新規商品を発注する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">発注</span><span class="chip info">取引先</span><span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-新規商品を発注する">メモ</label><textarea id="memo-buc-新規商品を発注する" data-key="buc-新規商品を発注する" data-label="新規商品を発注する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>売上の把握</h3><figure class="dg"><pre class="mermaid">flowchart LR
+  subgraph l1[&quot;経営者&quot;]
+    b2([&quot;売上の状況を見る&quot;])
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class b2 hyp</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>売上の状況を見る</b><span class="sub"><span class="chip req">R-16</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;経営者&quot;]
+    act2[&quot;売上の状況を見る&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act2 hyp</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">売上の状況を見る</span><span class="chip who">経営者</span></div><div class="sub">扱う情報: <span class="chip info">売上</span></div></li></ol></details><div class="memo"><label for="memo-buc-売上の状況を見る">メモ</label><textarea id="memo-buc-売上の状況を見る" data-key="buc-売上の状況を見る" data-label="売上の状況を見る" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>オーダー処理</h3><figure class="dg"><pre class="mermaid">flowchart LR
+  subgraph l1[&quot;オーダー部門&quot;]
+    b2([&quot;オーダーを確認し受理をメールで通知する&quot;])
+    b3([&quot;入金情報をオーダーと照合する&quot;])
+    b4([&quot;在庫を確認し在庫切れのオーダーを入荷待ちにする&quot;])
+    b5([&quot;在庫切れのとき取引先に追加発注する&quot;])
+    b6([&quot;入金が確認されたオーダーの出荷指示を行う&quot;])
+    b7([&quot;入金の不足分の追加支払いを依頼する&quot;])
+    b8([&quot;入金の過多分を返金する&quot;])
+    b9([&quot;返品を受け付ける&quot;])
+    b10([&quot;配送終了を確認しオーダーを完了する&quot;])
+  end
+  b2 --&gt; b3
+  b3 --&gt; b4
+  b4 --&gt; b5
+  b5 --&gt; b6
+  b6 --&gt; b7
+  b7 --&gt; b8
+  b8 --&gt; b9
+  b9 --&gt; b10
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>オーダーを確認し受理をメールで通知する</b><span class="sub"><span class="chip req">R-18</span><span class="chip req">R-21</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;オーダーを確認する&quot;]
+    act3[&quot;受理と支払い方法を顧客にメールで通知する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">オーダーを確認する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">受理と支払い方法を顧客にメールで通知する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span><span class="chip info">顧客</span></div></li></ol></details><div class="memo"><label for="memo-buc-オーダーを確認し受理をメールで通知する">メモ</label><textarea id="memo-buc-オーダーを確認し受理をメールで通知する" data-key="buc-オーダーを確認し受理をメールで通知する" data-label="オーダーを確認し受理をメールで通知する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>入金情報をオーダーと照合する</b><span class="sub"><span class="chip req">R-06</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;決済システム&quot;]
+    act2[&quot;入金情報通知を受けてオーダーと照合する&quot;]
+  end
+  subgraph l3[&quot;オーダー部門&quot;]
+    act4[&quot;照合できない入金を確認する&quot;]
+  end
+  act2 --&gt; act4
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">入金情報通知を受けてオーダーと照合する</span><span class="chip who">決済システム</span></div><div class="sub">扱う情報: <span class="chip info">入金</span><span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">照合できない入金を確認する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">入金</span><span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-入金情報をオーダーと照合する">メモ</label><textarea id="memo-buc-入金情報をオーダーと照合する" data-key="buc-入金情報をオーダーと照合する" data-label="入金情報をオーダーと照合する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>在庫を確認し在庫切れのオーダーを入荷待ちにする</b><span class="sub"><span class="chip req">R-07</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;オーダー別の在庫を確認する&quot;]
+    act3[&quot;在庫切れのオーダーを入荷待ちにする&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">オーダー別の在庫を確認する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span><span class="chip info">在庫</span></div></li><li><div class="step-h"><span class="step-name">在庫切れのオーダーを入荷待ちにする</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-在庫を確認し在庫切れのオーダーを入荷待ちにする">メモ</label><textarea id="memo-buc-在庫を確認し在庫切れのオーダーを入荷待ちにする" data-key="buc-在庫を確認し在庫切れのオーダーを入荷待ちにする" data-label="在庫を確認し在庫切れのオーダーを入荷待ちにする" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>在庫切れのとき取引先に追加発注する</b><span class="sub"><span class="chip req">R-10</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;取引先に追加発注する&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">取引先に追加発注する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">発注</span><span class="chip info">取引先</span><span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-在庫切れのとき取引先に追加発注する">メモ</label><textarea id="memo-buc-在庫切れのとき取引先に追加発注する" data-key="buc-在庫切れのとき取引先に追加発注する" data-label="在庫切れのとき取引先に追加発注する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>入金が確認されたオーダーの出荷指示を行う</b><span class="sub"><span class="chip req">R-09</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;出荷指示を行う&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">出荷指示を行う</span><span class="chip who">オーダー部門</span><span class="chip who">出荷システム</span></div><div class="sub">扱う情報: <span class="chip info">出荷指示</span><span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-入金が確認されたオーダーの出荷指示を行う">メモ</label><textarea id="memo-buc-入金が確認されたオーダーの出荷指示を行う" data-key="buc-入金が確認されたオーダーの出荷指示を行う" data-label="入金が確認されたオーダーの出荷指示を行う" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>入金の不足分の追加支払いを依頼する</b><span class="sub"><span class="chip req">R-22</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;顧客と差額を確認する&quot;]
+    act3[&quot;差額の追加支払いを依頼する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">顧客と差額を確認する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">入金</span><span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">差額の追加支払いを依頼する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">入金</span><span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-入金の不足分の追加支払いを依頼する">メモ</label><textarea id="memo-buc-入金の不足分の追加支払いを依頼する" data-key="buc-入金の不足分の追加支払いを依頼する" data-label="入金の不足分の追加支払いを依頼する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>入金の過多分を返金する</b><span class="sub"><span class="chip req">R-22</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;顧客に連絡して差額を返金する&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">顧客に連絡して差額を返金する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">入金</span><span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-入金の過多分を返金する">メモ</label><textarea id="memo-buc-入金の過多分を返金する" data-key="buc-入金の過多分を返金する" data-label="入金の過多分を返金する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>返品を受け付ける</b><span class="sub"><span class="chip req">R-23</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;返品をメールもしくは電話で受け付ける&quot;]
+    act3[&quot;返品された代金を返金する&quot;]
+  end
+  subgraph l4[&quot;物流&quot;]
+    act5[&quot;返品された商品を在庫に戻す&quot;]
+  end
+  act2 --&gt; act3
+  act3 --&gt; act5
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act3,act5 hyp</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">返品をメールもしくは電話で受け付ける</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">返品</span><span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">返品された代金を返金する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">返品</span><span class="chip info">入金</span></div></li><li><div class="step-h"><span class="step-name">返品された商品を在庫に戻す</span><span class="chip who">物流</span></div><div class="sub">扱う情報: <span class="chip info">返品</span><span class="chip info">在庫</span></div></li></ol></details><div class="memo"><label for="memo-buc-返品を受け付ける">メモ</label><textarea id="memo-buc-返品を受け付ける" data-key="buc-返品を受け付ける" data-label="返品を受け付ける" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>配送終了を確認しオーダーを完了する</b><span class="sub"><span class="chip req">R-24</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;オーダー部門&quot;]
+    act2[&quot;配送会社からの配送終了のメール通知を確認する&quot;]
+    act3[&quot;オーダーを完了する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">配送会社からの配送終了のメール通知を確認する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">オーダーを完了する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-配送終了を確認しオーダーを完了する">メモ</label><textarea id="memo-buc-配送終了を確認しオーダーを完了する" data-key="buc-配送終了を確認しオーダーを完了する" data-label="配送終了を確認しオーダーを完了する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>出荷と入荷</h3><figure class="dg"><pre class="mermaid">flowchart LR
+  subgraph l1[&quot;物流&quot;]
+    b2([&quot;締め毎に商品を出荷する&quot;])
+    b3([&quot;入荷情報を入荷システムに入力する&quot;])
+  end
+  b2 --&gt; b3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>締め毎に商品を出荷する</b><span class="sub"><span class="chip req">R-09</span><span class="chip req">R-25</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;物流&quot;]
+    act2[&quot;締め毎に出荷作業を行う&quot;]
+  end
+  subgraph l3[&quot;出荷システム&quot;]
+    act4[&quot;出荷作業の完了を通知する&quot;]
+  end
+  act2 --&gt; act4
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">締め毎に出荷作業を行う</span><span class="chip who">物流</span><span class="chip who">出荷システム</span></div><div class="sub">扱う情報: <span class="chip info">出荷指示</span></div></li><li><div class="step-h"><span class="step-name">出荷作業の完了を通知する</span><span class="chip who">出荷システム</span></div><div class="sub">扱う情報: <span class="chip info">出荷指示</span><span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-締め毎に商品を出荷する">メモ</label><textarea id="memo-buc-締め毎に商品を出荷する" data-key="buc-締め毎に商品を出荷する" data-label="締め毎に商品を出荷する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>入荷情報を入荷システムに入力する</b><span class="sub"><span class="chip req">R-08</span><span class="chip req">R-10</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;物流&quot;]
+    act2[&quot;入荷情報を入荷システムに入力する&quot;]
+  end
+  subgraph l3[&quot;入荷システム&quot;]
+    act4[&quot;入荷情報を発注と突き合わせる&quot;]
+    act5[&quot;入荷待ちのオーダーの入荷待ちを解除する&quot;]
+  end
+  act2 --&gt; act4
+  act4 --&gt; act5
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act4 hyp</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">入荷情報を入荷システムに入力する</span><span class="chip who">物流</span><span class="chip who">入荷システム</span></div><div class="sub">扱う情報: <span class="chip info">入荷</span></div></li><li><div class="step-h"><span class="step-name">入荷情報を発注と突き合わせる</span><span class="chip who">入荷システム</span></div><div class="sub">扱う情報: <span class="chip info">入荷</span><span class="chip info">発注</span></div></li><li><div class="step-h"><span class="step-name">入荷待ちのオーダーの入荷待ちを解除する</span><span class="chip who">入荷システム</span></div><div class="sub">扱う情報: <span class="chip info">入荷</span><span class="chip info">オーダー</span><span class="chip info">在庫</span></div></li></ol></details><div class="memo"><label for="memo-buc-入荷情報を入荷システムに入力する">メモ</label><textarea id="memo-buc-入荷情報を入荷システムに入力する" data-key="buc-入荷情報を入荷システムに入力する" data-label="入荷情報を入荷システムに入力する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>顧客の声の把握</h3><figure class="dg"><pre class="mermaid">flowchart LR
+  subgraph l1[&quot;顧客&quot;]
+    b2([&quot;レビュー・感想を投稿する&quot;])
+  end
+  subgraph l3[&quot;営業&quot;]
+    b4([&quot;レビュー・感想を集計し商品開発に使う&quot;])
+  end
+  b4 -.-&gt;|&quot;レビュー、商品&quot;| b2
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>レビュー・感想を投稿する</b><span class="sub"><span class="chip req">R-13</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;顧客&quot;]
+    act2[&quot;購入した商品のレビュー・感想を投稿する&quot;]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">購入した商品のレビュー・感想を投稿する</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">レビュー</span><span class="chip info">商品</span><span class="chip info">オーダー</span></div></li></ol></details><div class="memo"><label for="memo-buc-レビュー・感想を投稿する">メモ</label><textarea id="memo-buc-レビュー・感想を投稿する" data-key="buc-レビュー・感想を投稿する" data-label="レビュー・感想を投稿する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="flow"><div class="flow-h"><b>レビュー・感想を集計し商品開発に使う</b><span class="sub"><span class="chip req">R-14</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  subgraph l1[&quot;営業&quot;]
+    act2[&quot;商品ごとにレビュー・感想を集計する&quot;]
+    act3[&quot;商品開発を検討する&quot;]
+  end
+  act2 --&gt; act3
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">商品ごとにレビュー・感想を集計する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">レビュー</span><span class="chip info">商品</span></div></li><li><div class="step-h"><span class="step-name">商品開発を検討する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">レビュー</span></div></li></ol></details><div class="memo"><label for="memo-buc-レビュー・感想を集計し商品開発に使う">メモ</label><textarea id="memo-buc-レビュー・感想を集計し商品開発に使う" data-key="buc-レビュー・感想を集計し商品開発に使う" data-label="レビュー・感想を集計し商品開発に使う" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div></section><section id="info"><h2>情報</h2><p class="lead">システムが記録する情報です。表の見出しはコンテキストです。</p><figure class="dg"><pre class="mermaid">flowchart LR
+  i1([&quot;商品&quot;])
+  i2([&quot;顧客&quot;])
+  i3([&quot;カート&quot;])
+  i4([&quot;オーダー&quot;])
+  i5([&quot;入金&quot;])
+  i6([&quot;返品&quot;])
+  i7([&quot;在庫&quot;])
+  i8([&quot;出荷指示&quot;])
+  i9([&quot;入荷&quot;])
+  i10([&quot;発注&quot;])
+  i11([&quot;取引先&quot;])
+  i12([&quot;売上&quot;])
+  i13([&quot;レビュー&quot;])
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>矢印の文字は数の関係(例: 1対多 = 左の1つに右が複数)。点線は多対多</figcaption></figure><div class="ctx"><h3>商品</h3><div class="tbl"><table><thead><tr><th>情報</th><th>説明</th><th>主な項目</th><th>状態・バリエーション</th><th>使うアクティビティ</th></tr></thead><tbody><tr><td><b>商品</b></td><td>Web 上での取り扱い商品。商品の特性を持つ</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">購入する商品を選ぶ</span><span class="chip">カートに追加する</span><span class="chip">取り扱い商品を登録する</span><span class="chip">取り扱い商品を削除する</span><span class="chip">売上を週単位・月単位で集計する</span><span class="chip">売上情報を場所と商品の特性で分析する</span><span class="chip">次週以降の商品の品揃えを検討する</span><span class="chip">今後追加発注しない商品をマークする</span><span class="chip">売れ筋商品の在庫量を多くする</span><span class="chip">取引先に新規商品を発注する</span><span class="chip">取引先に追加発注する</span><span class="chip">購入した商品のレビュー・感想を投稿する</span><span class="chip">商品ごとにレビュー・感想を集計する</span></td></tr></tbody></table></div></div><div class="ctx"><h3>顧客</h3><div class="tbl"><table><thead><tr><th>情報</th><th>説明</th><th>主な項目</th><th>状態・バリエーション</th><th>使うアクティビティ</th></tr></thead><tbody><tr><td><b>顧客</b></td><td>会員登録した顧客、または購入時に入力された顧客</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">会員情報を登録する</span><span class="chip">決済情報と送付先の情報を入力する</span><span class="chip">受理と支払い方法を顧客にメールで通知する</span></td></tr></tbody></table></div></div><div class="ctx"><h3>オーダー</h3><div class="tbl"><table><thead><tr><th>情報</th><th>説明</th><th>主な項目</th><th>状態・バリエーション</th><th>使うアクティビティ</th></tr></thead><tbody><tr><td><b>カート</b></td><td>顧客が購入する商品を選び終えるまで追加しておくもの</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">カートに追加する</span><span class="chip">購入指示を行う</span></td></tr><tr><td><b>オーダー</b></td><td>顧客の購入指示。オーダーID で管理し、決済方法と送付先を持つ</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">購入指示を行う</span><span class="chip">決済情報と送付先の情報を入力する</span><span class="chip">ABC商事からのメールを確認する</span><span class="chip">オーダーの状態を確認する</span><span class="chip">オーダーをキャンセルする</span><span class="chip">入金済みの代金を返金する</span><span class="chip">オーダーを確認する</span><span class="chip">受理と支払い方法を顧客にメールで通知する</span><span class="chip">入金情報通知を受けてオーダーと照合する</span><span class="chip">照合できない入金を確認する</span><span class="chip">オーダー別の在庫を確認する</span><span class="chip">在庫切れのオーダーを入荷待ちにする</span><span class="chip">出荷指示を行う</span><span class="chip">顧客と差額を確認する</span><span class="chip">差額の追加支払いを依頼する</span><span class="chip">顧客に連絡して差額を返金する</span><span class="chip">返品をメールもしくは電話で受け付ける</span><span class="chip">配送会社からの配送終了のメール通知を確認する</span><span class="chip">オーダーを完了する</span><span class="chip">出荷作業の完了を通知する</span><span class="chip">入荷待ちのオーダーの入荷待ちを解除する</span><span class="chip">購入した商品のレビュー・感想を投稿する</span></td></tr><tr><td><b>入金</b></td><td>決済システムから通知される入金情報。備考にオーダーID が記載される</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">選択した決済方法に従って支払う</span><span class="chip">入金済みの代金を返金する</span><span class="chip">入金情報通知を受けてオーダーと照合する</span><span class="chip">照合できない入金を確認する</span><span class="chip">顧客と差額を確認する</span><span class="chip">差額の追加支払いを依頼する</span><span class="chip">顧客に連絡して差額を返金する</span><span class="chip">返品された代金を返金する</span></td></tr><tr><td><b>返品</b></td><td>オーダー部門がメール・電話で受け付けた返品</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">返品をメールもしくは電話で受け付ける</span><span class="chip">返品された代金を返金する</span><span class="chip">返品された商品を在庫に戻す</span></td></tr></tbody></table></div></div><div class="ctx"><h3>在庫</h3><div class="tbl"><table><thead><tr><th>情報</th><th>説明</th><th>主な項目</th><th>状態・バリエーション</th><th>使うアクティビティ</th></tr></thead><tbody><tr><td><b>在庫</b></td><td>商品ごとの在庫。直営店の在庫とは共有しない</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">今後追加発注しない商品をマークする</span><span class="chip">売れ筋商品の在庫量を多くする</span><span class="chip">オーダー別の在庫を確認する</span><span class="chip">返品された商品を在庫に戻す</span><span class="chip">入荷待ちのオーダーの入荷待ちを解除する</span></td></tr><tr><td><b>出荷指示</b></td><td>出荷システムへ連携する出荷指示と、出荷作業の完了</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">出荷指示を行う</span><span class="chip">締め毎に出荷作業を行う</span><span class="chip">出荷作業の完了を通知する</span></td></tr><tr><td><b>入荷</b></td><td>入荷システムから送られる入荷商品の情報</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">入荷情報を入荷システムに入力する</span><span class="chip">入荷情報を発注と突き合わせる</span><span class="chip">入荷待ちのオーダーの入荷待ちを解除する</span></td></tr></tbody></table></div></div><div class="ctx"><h3>発注</h3><div class="tbl"><table><thead><tr><th>情報</th><th>説明</th><th>主な項目</th><th>状態・バリエーション</th><th>使うアクティビティ</th></tr></thead><tbody><tr><td><b>発注</b></td><td>取引先への発注(在庫切れ時の追加発注、新規商品の発注)</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">取引先に新規商品を発注する</span><span class="chip">取引先に追加発注する</span><span class="chip">入荷情報を発注と突き合わせる</span></td></tr><tr><td><b>取引先</b></td><td>商品の発注先</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">取引先に新規商品を発注する</span><span class="chip">取引先に追加発注する</span></td></tr></tbody></table></div></div><div class="ctx"><h3>販売分析</h3><div class="tbl"><table><thead><tr><th>情報</th><th>説明</th><th>主な項目</th><th>状態・バリエーション</th><th>使うアクティビティ</th></tr></thead><tbody><tr><td><b>売上</b></td><td>商品の特性・売れた時期・売れた場所(送付先の地域)。週単位で集計し、月単位でも見る</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">売上を週単位・月単位で集計する</span><span class="chip">売れた場所をマップ上で見る</span><span class="chip">売上情報を場所と商品の特性で分析する</span><span class="chip">売上の状況を見る</span></td></tr></tbody></table></div></div><div class="ctx"><h3>顧客の声</h3><div class="tbl"><table><thead><tr><th>情報</th><th>説明</th><th>主な項目</th><th>状態・バリエーション</th><th>使うアクティビティ</th></tr></thead><tbody><tr><td><b>レビュー</b></td><td>購入した顧客が投稿する商品のレビュー・感想</td><td><span class=none>未定</span></td><td><span class=none>なし</span></td><td><span class="chip">購入した商品のレビュー・感想を投稿する</span><span class="chip">商品ごとにレビュー・感想を集計する</span><span class="chip">商品開発を検討する</span></td></tr></tbody></table></div></div><div class="memo"><label for="memo-info">メモ</label><textarea id="memo-info" data-key="info" data-label="情報" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="states"><h2>状態遷移</h2><p class="lead">記録した情報が、業務の中でどんな状態を経て移り変わるかです。</p><div class="sm"><h3>オーダー状態</h3><div class="states"><span class="state">受付済</span><span class="state">受理済</span><span class="state">入金待ち</span><span class="state">入金確認済</span><span class="state">入荷待ち</span><span class="state">出荷指示済</span><span class="state">出荷済</span><span class="state">完了</span><span class="state">キャンセル済</span><span class="state">返品受付済</span></div><p class="sub">どのUCでどの状態に移るかは、まだ決まっていません。</p></div><div class="sm"><h3>商品状態</h3><div class="states"><span class="state">取扱中</span><span class="state">追加発注しない</span><span class="state">取扱終了</span></div><p class="sub">どのUCでどの状態に移るかは、まだ決まっていません。</p></div><div class="sm"><h3>発注状態</h3><div class="states"><span class="state">発注済</span><span class="state">入荷済</span></div><p class="sub">どのUCでどの状態に移るかは、まだ決まっていません。</p></div><div class="memo"><label for="memo-states">メモ</label><textarea id="memo-states" data-key="states" data-label="状態遷移" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="decided"><h2>これまでに決まったこと</h2><p class="lead">質問への回答で決まったことです。認識が違うものがあれば、メモに書いてください。</p><ul class="decisions"><li id="Q-001"><div class="dq"><span class="qid">Q-001</span>「顧客の声を把握し商品開発につなげる」は、どの業務で実現しますか</div><div class="da">購入した顧客が商品のレビュー・感想を Web で投稿し、営業が商品ごとに集計して商品開発の検討に使う</div></li><li id="Q-002"><div class="dq"><span class="qid">Q-002</span>顧客は会員登録してから購入しますか</div><div class="da">会員登録なしでも購入でき、希望者は会員登録できる</div></li><li id="Q-003"><div class="dq"><span class="qid">Q-003</span>入金の確認は、決済システムからの通知で自動で行いますか、オーダー部門が人の手で行いますか</div><div class="da">決済システムの入金情報通知を受けてシステムがオーダーと照合し、照合できないもの・金額が異なるものだけオーダー部門が確認する</div></li><li id="Q-004"><div class="dq"><span class="qid">Q-004</span>出荷指示は誰がどこへ出しますか(オーダー部門と物流の役割)</div><div class="da">オーダー部門の出荷指示がそのまま出荷システムへ連携される(物流は出荷作業のみ)</div></li><li id="Q-005"><div class="dq"><span class="qid">Q-005</span>取引先への発注は、このシステムで扱いますか。誰が行いますか</div><div class="da">在庫切れ時の追加発注(物流)も新規商品の発注(営業)もこのシステムで記録し、発注先への送付は従来どおりの手段で行う</div></li><li id="Q-006"><div class="dq"><span class="qid">Q-006</span>直営店での小売りは、このシステムの対象外ですか</div><div class="da">直営店での販売・店舗の在庫は対象外。直営店と Web の在庫は共有しない</div></li><li id="Q-007"><div class="dq"><span class="qid">Q-007</span>経営者とシステム部門は、このシステムを使いますか</div><div class="da">経営者は売上の状況を見る。システム部門は利用者ではない(保守のみ)</div></li><li id="Q-008"><div class="dq"><span class="qid">Q-008</span>売れた時期は、月単位と週単位のどちらで管理しますか</div><div class="da">週単位で集計し、月単位でも見られるようにする</div></li><li id="Q-009"><div class="dq"><span class="qid">Q-009</span>「売れた場所」は何の場所ですか</div><div class="da">顧客が入力した送付先の地域(都道府県・市区町村)</div></li><li id="Q-010"><div class="dq"><span class="qid">Q-010</span>物流の言う「入庫、出庫システム」は、「入荷システム、出荷システム」と同じものですか</div><div class="da">同じもの</div></li><li id="Q-011"><div class="dq"><span class="qid">Q-011</span>オーダーのキャンセルや返品は受け付けますか</div><div class="da">出荷前のキャンセルを顧客が Web で行え、返品はオーダー部門がメール・電話で受け付ける</div></li><li id="Q-012"><div class="dq"><span class="qid">Q-012</span>このシステムの名前を決めてください</div><div class="da">rdra-webapp</div></li><li id="Q-013"><div class="dq"><span class="qid">Q-013</span>入金額が多すぎた場合はどうしますか</div><div class="da">オーダー部門が顧客に連絡し、差額を返金する</div></li><li id="Q-014"><div class="dq"><span class="qid">Q-014</span>配送会社からの配送終了の連絡は、人がメールを見て処理しますか</div><div class="da">当面はオーダー部門がメールを見てオーダーを完了にする(配送会社とのシステム連携はしない)</div></li><li id="Q-015"><div class="dq"><span class="qid">Q-015</span>在庫切れの確認・入荷待ちのチェック・取引先への追加発注は、誰が行いますか</div><div class="da">出荷指示の前に、システムがオーダー別の在庫を確認して在庫切れのオーダーを入荷待ちにし、オーダー部門が取引先に追加発注する</div></li></ul><div class="memo"><label for="memo-decided">メモ</label><textarea id="memo-decided" data-key="decided" data-label="これまでに決まったこと" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="open"><h2>議論したいこと</h2><div class="oq" id="Q-016"><div class="oq-h"><span class="pri high">優先度 高</span><span class="qid">Q-016</span><b>何がどれだけ達成できたら、この Web 通販は成功と言えますか</b></div><dl><dt>AIの提案</dt><dd>G-01 は「新商品を入荷から○日以内に Web に掲載」と「Web 売上が月○円」、G-02 は「レビュー・感想を月○件集め、品揃え・商品開発の検討に毎月使う」</dd><dt>理由</dt><dd>初期要望の最重要要求に目的はあるが、達成を判断する基準(数値・期限)がない。「タイムリーに」の具体的な目安も書かれていない</dd></dl><ol class="choices"><li><b>A</b> 提案の形で数値を決める(数値を回答欄に記入)</li><li><b>B</b> 判断基準は売上だけにする(数値を回答欄に記入)</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-016">メモ</label><textarea id="memo-Q-016" data-key="Q-016" data-label="Q-016 何がどれだけ達成できたら、この Web 通販は成功と言えますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-017"><div class="oq-h"><span class="pri high">優先度 高</span><span class="qid">Q-017</span><b>顧客の「商品を選ぶ → 購入指示 → メールを見て支払う → 状態を確認する」を、1つの購入の流れとしてまとめてよいですか</b></div><dl><dt>AIの提案</dt><dd>4つを1つの流れ「Web で商品を購入する」にまとめ、それぞれをその中のステップにする。「会員登録する」「出荷前のオーダーをキャンセルする」は別の流れのまま</dd><dt>理由</dt><dd>初期要望の業務の概要ではこの4つが別々の項目だが、「カートに追加する」「購入指示を行う」だけでは顧客は商品を受け取れず、支払い・状態確認まで続いて1回の購入が終わる</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(4つを1つの購入の流れにまとめる)</li><li><b>B</b> 「状態を確認する」だけは別の流れにする</li><li><b>C</b> まとめない(初期要望のまま4つに分ける)</li><li><b>D</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-017">メモ</label><textarea id="memo-Q-017" data-key="Q-017" data-label="Q-017 顧客の「商品を選ぶ → 購入指示 → メールを見て支払う → 状態を確認する」を、1つの購入の流れとしてまとめてよいですか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-018"><div class="oq-h"><span class="pri high">優先度 高</span><span class="qid">Q-018</span><b>営業の商品管理を、次の3つの流れにまとめてよいですか</b></div><dl><dt>AIの提案</dt><dd>(1)「売上を分析して品揃えを決める」(売上の集計・マップ表示・週次の分析・品揃えの検討)、(2)「在庫商品の扱いを変える」(追加発注しないマーク・売れ筋の在庫量を多くする)、(3)「取り扱い商品を登録・削除する」はそのまま</dd><dt>理由</dt><dd>初期要望では「売れた時期・場所を管理する」と「週単位で分析し品揃えを検討する」が別項目だが、管理した売上を分析に使う一続きの作業に読める。「追加発注しないものをマーク」「在庫量を多くする」はメモ4で「商品の扱いを変更する」の例として並んでいる</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(3つの流れにまとめる)</li><li><b>B</b> 売上の管理と分析は分けたまま、在庫商品の扱いだけまとめる</li><li><b>C</b> まとめない(初期要望のまま)</li><li><b>D</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-018">メモ</label><textarea id="memo-Q-018" data-key="Q-018" data-label="Q-018 営業の商品管理を、次の3つの流れにまとめてよいですか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-019"><div class="oq-h"><span class="pri high">優先度 高</span><span class="qid">Q-019</span><b>オーダー部門の仕事を、次の流れにまとめてよいですか</b></div><dl><dt>AIの提案</dt><dd>(1)「オーダーを受けて出荷する」(確認・受理通知 → 入金照合 → 在庫確認・入荷待ち → 出荷指示 → 配送終了の確認・完了)、(2)「入金の過不足を精算する」(不足分の追加支払い依頼・過多分の返金)、(3)「在庫切れの商品を追加発注する」、(4)「返品を受け付ける」</dd><dt>理由</dt><dd>初期要望の業務の概要ではオーダー処理に9つの項目が並ぶが、受理から完了までは1つのオーダーが順に進む一続きの流れに読める。過不足の精算・追加発注・返品は、すべてのオーダーで起きるわけではない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(4つの流れにまとめる)</li><li><b>B</b> 追加発注も(1)の中に入れ、3つの流れにする</li><li><b>C</b> まとめない(初期要望のまま9つ)</li><li><b>D</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-019">メモ</label><textarea id="memo-Q-019" data-key="Q-019" data-label="Q-019 オーダー部門の仕事を、次の流れにまとめてよいですか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-020"><div class="oq-h"><span class="pri high">優先度 高</span><span class="qid">Q-020</span><b>商品ごとの在庫数は、このシステムで持ちますか。入荷システム・出荷システムの在庫を参照しますか</b></div><dl><dt>AIの提案</dt><dd>このシステムが Web 用の在庫数を持ち、入荷システムの入荷情報で増やし、出荷システムの出荷完了で減らす</dd><dt>理由</dt><dd>初期要望に「システムがオーダー別の在庫を確認し、在庫切れのオーダーを入荷待ちにする」とあるが、在庫数をどこで管理するかの記述がない。入荷システム・出荷システムは既存で、在庫を持っているかが分からない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(このシステムで在庫数を持つ)</li><li><b>B</b> 既存の入荷・出荷システム側の在庫を参照する</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-020">メモ</label><textarea id="memo-Q-020" data-key="Q-020" data-label="Q-020 商品ごとの在庫数は、このシステムで持ちますか。入荷システム・出荷システムの在庫を参照しますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-021"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-021</span><b>経営者が「売上の状況を見る」のは、営業の売上分析と同じものを見ますか</b></div><dl><dt>AIの提案</dt><dd>営業と同じ売上の集計(週・月、場所、商品の特性)を見る。別の業務「売上の把握」として置く</dd><dt>理由</dt><dd>初期要望の背景に「経営者は売上の状況を見る」とあるが、業務の概要に経営者の業務がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(営業と同じ集計を見る)</li><li><b>B</b> 全体の売上だけ(経営者向けの要約)を見る</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-021">メモ</label><textarea id="memo-Q-021" data-key="Q-021" data-label="Q-021 経営者が「売上の状況を見る」のは、営業の売上分析と同じものを見ますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-022"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-022</span><b>支払い済みのオーダーを顧客がキャンセルしたとき、代金を返金しますか</b></div><dl><dt>AIの提案</dt><dd>オーダー部門が返金する</dd><dt>理由</dt><dd>初期要望に「出荷前のオーダーを Web でキャンセルする」とあるが、すでに支払った後のキャンセルの扱いの記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(オーダー部門が返金する)</li><li><b>B</b> 支払い後はキャンセルできない</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-022">メモ</label><textarea id="memo-Q-022" data-key="Q-022" data-label="Q-022 支払い済みのオーダーを顧客がキャンセルしたとき、代金を返金しますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-023"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-023</span><b>返品を受け付けた後、代金の返金と商品の在庫への戻しはどうしますか</b></div><dl><dt>AIの提案</dt><dd>オーダー部門が代金を返金し、物流が戻ってきた商品を確認して在庫に戻す</dd><dt>理由</dt><dd>初期要望に「返品をメールもしくは電話で受け付ける」とあるが、受け付けた後の流れの記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(返金し、在庫に戻す)</li><li><b>B</b> 返金はするが在庫には戻さない(廃棄など)</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-023">メモ</label><textarea id="memo-Q-023" data-key="Q-023" data-label="Q-023 返品を受け付けた後、代金の返金と商品の在庫への戻しはどうしますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-024"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-024</span><b>顧客が選べる決済方法(入金手段)は何ですか</b></div><dl><dt>AIの提案</dt><dd>銀行振込、クレジットカード、コンビニ払い</dd><dt>理由</dt><dd>初期要望の背景に「入金手段を多くしてほしい」、業務の概要に「メールに記載された金額を Web で選択した決済方法に従って支払う」とあるが、具体的な手段の記述がない。決済システムがどの手段に対応しているかも分からない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(銀行振込、クレジットカード、コンビニ払い)</li><li><b>B</b> 決済システムが対応しているものすべて</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-024">メモ</label><textarea id="memo-Q-024" data-key="Q-024" data-label="Q-024 顧客が選べる決済方法(入金手段)は何ですか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-025"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-025</span><b>取り扱い商品の価格・説明・写真は、誰が登録しますか</b></div><dl><dt>AIの提案</dt><dd>営業が商品の登録と同時に、価格・説明・写真・商品の特性を登録する</dd><dt>理由</dt><dd>初期要望に「営業は仕入れた商品を Web 上での取り扱い商品として登録、もしくは削除する」とあるが、Web で紹介する内容(価格・説明・写真)を誰が決めて登録するかの記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(営業がすべて登録する)</li><li><b>B</b> 価格は別の部署(経営者など)が決める</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-025">メモ</label><textarea id="memo-Q-025" data-key="Q-025" data-label="Q-025 取り扱い商品の価格・説明・写真は、誰が登録しますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-026"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-026</span><b>オーダーは、受理されるまでと支払われるまで、どんな状態として扱いますか</b></div><dl><dt>AIの提案</dt><dd>顧客が購入指示をした直後は「受付済」、オーダー部門が受理してから入金が確認されるまでは「入金待ち」</dd><dt>理由</dt><dd>初期要望に「オーダー確認を行い、オーダーを受理したこと…を通知する」「メールに記載された金額を…支払う」とあり、受理前と入金前の期間があるが、その間の状態の呼び方の記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(受付済、入金待ち)</li><li><b>B</b> 受理済のまま入金を待つ(入金待ちは置かない)</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-026">メモ</label><textarea id="memo-Q-026" data-key="Q-026" data-label="Q-026 オーダーは、受理されるまでと支払われるまで、どんな状態として扱いますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-027"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-027</span><b>入荷した商品は、取引先への発注と突き合わせますか</b></div><dl><dt>AIの提案</dt><dd>入荷システムからの入荷情報を発注と突き合わせ、発注を「入荷済」にする</dd><dt>理由</dt><dd>初期要望に「取引先への発注はこのシステムで記録する」「入荷情報は入荷システムから当システムに送られる」とあるが、入荷と発注を結びつけるかの記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(突き合わせて入荷済にする)</li><li><b>B</b> 突き合わせない(発注は記録だけ)</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-027">メモ</label><textarea id="memo-Q-027" data-key="Q-027" data-label="Q-027 入荷した商品は、取引先への発注と突き合わせますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-028"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-028</span><b>レビュー・感想を投稿できるのは、会員だけですか</b></div><dl><dt>AIの提案</dt><dd>その商品を購入した会員だけが投稿できる</dd><dt>理由</dt><dd>初期要望に「購入した顧客が商品のレビュー・感想を Web で投稿する」と「会員登録しなくても購入できる」の両方があり、会員でない購入者が投稿できるかの記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(購入した会員のみ)</li><li><b>B</b> 購入した人なら会員でなくても投稿できる</li><li><b>C</b> 誰でも投稿できる</li><li><b>D</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-028">メモ</label><textarea id="memo-Q-028" data-key="Q-028" data-label="Q-028 レビュー・感想を投稿できるのは、会員だけですか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-029"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-029</span><b>「売れ筋商品の在庫量を多くする」は、具体的に何をすることですか</b></div><dl><dt>AIの提案</dt><dd>営業が商品ごとの目標の在庫量(これを下回ったら追加発注する量)を引き上げる</dd><dt>理由</dt><dd>初期要望に「売れ筋商品で在庫切れによる機会損失を無くすために在庫量を多くする」とあるが、追加で発注するのか、在庫の目標値を変えるのかの記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(目標の在庫量を引き上げる)</li><li><b>B</b> その場で追加発注する</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-029">メモ</label><textarea id="memo-Q-029" data-key="Q-029" data-label="Q-029 「売れ筋商品の在庫量を多くする」は、具体的に何をすることですか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><div class="oq" id="Q-030"><div class="oq-h"><span class="pri mid">優先度 中</span><span class="qid">Q-030</span><b>顧客からの問い合わせ(配送・商品・支払いなど)は、誰がどう受けますか</b></div><dl><dt>AIの提案</dt><dd>オーダー部門がメール・電話で受ける(このシステムでは記録しない)</dd><dt>理由</dt><dd>初期要望に入金の差額確認と返品の受付をオーダー部門がメール・電話で行うとあるが、それ以外の問い合わせの受付の記述がない</dd></dl><ol class="choices"><li><b>A</b> 提案どおり(オーダー部門がメール・電話で受け、記録しない)</li><li><b>B</b> オーダー部門が受け、このシステムに記録する</li><li><b>C</b> その他 → ___</li></ol><div class="memo"><label for="memo-Q-030">メモ</label><textarea id="memo-Q-030" data-key="Q-030" data-label="Q-030 顧客からの問い合わせ(配送・商品・支払いなど)は、誰がどう受けますか" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>AIの仮説で、確認が必要なもの</h3><ul class="rels"><li>要求:R-16 </li><li>BUC:出荷前のオーダーをキャンセルする/入金済みの代金を返金する </li><li>BUC:売上の状況を見る/売上の状況を見る </li><li>BUC:返品を受け付ける/返品された代金を返金する </li><li>BUC:返品を受け付ける/返品された商品を在庫に戻す </li><li>BUC:入荷情報を入荷システムに入力する/入荷情報を発注と突き合わせる </li><li>状態:オーダー状態/受付済 </li><li>状態:オーダー状態/入金待ち </li><li>状態:発注状態/入荷済 </li></ul></section><section id="minutes"><h2>議事メモ</h2><p class="lead">各項目に書いたメモをまとめます。コピーして <code>docs/rdra/inputs/議事録_日付.md</code> に保存し、<code>/rdra apply</code> で反映します。メモはこのブラウザにだけ保存されます。</p><div class="mbar"><button id="copy" type="button">議事メモをコピー</button><button id="clear" type="button" class="ghost">メモをすべて消す</button><span id="msg" role="status"></span></div><pre id="out" class="out"></pre></section><script type="application/json" id="dg-details">{"情報:商品": "<dl><dt>説明<\/dt><dd>Web 上での取り扱い商品。商品の特性を持つ<\/dd><dt>コンテキスト<\/dt><dd>商品<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:顧客": "<dl><dt>説明<\/dt><dd>会員登録した顧客、または購入時に入力された顧客<\/dd><dt>コンテキスト<\/dt><dd>顧客<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:カート": "<dl><dt>説明<\/dt><dd>顧客が購入する商品を選び終えるまで追加しておくもの<\/dd><dt>コンテキスト<\/dt><dd>オーダー<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:オーダー": "<dl><dt>説明<\/dt><dd>顧客の購入指示。オーダーID で管理し、決済方法と送付先を持つ<\/dd><dt>コンテキスト<\/dt><dd>オーダー<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:入金": "<dl><dt>説明<\/dt><dd>決済システムから通知される入金情報。備考にオーダーID が記載される<\/dd><dt>コンテキスト<\/dt><dd>オーダー<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:返品": "<dl><dt>説明<\/dt><dd>オーダー部門がメール・電話で受け付けた返品<\/dd><dt>コンテキスト<\/dt><dd>オーダー<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:在庫": "<dl><dt>説明<\/dt><dd>商品ごとの在庫。直営店の在庫とは共有しない<\/dd><dt>コンテキスト<\/dt><dd>在庫<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:出荷指示": "<dl><dt>説明<\/dt><dd>出荷システムへ連携する出荷指示と、出荷作業の完了<\/dd><dt>コンテキスト<\/dt><dd>在庫<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:入荷": "<dl><dt>説明<\/dt><dd>入荷システムから送られる入荷商品の情報<\/dd><dt>コンテキスト<\/dt><dd>在庫<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:発注": "<dl><dt>説明<\/dt><dd>取引先への発注(在庫切れ時の追加発注、新規商品の発注)<\/dd><dt>コンテキスト<\/dt><dd>発注<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:取引先": "<dl><dt>説明<\/dt><dd>商品の発注先<\/dd><dt>コンテキスト<\/dt><dd>発注<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:売上": "<dl><dt>説明<\/dt><dd>商品の特性・売れた時期・売れた場所(送付先の地域)。週単位で集計し、月単位でも見る<\/dd><dt>コンテキスト<\/dt><dd>販売分析<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "情報:レビュー": "<dl><dt>説明<\/dt><dd>購入した顧客が投稿する商品のレビュー・感想<\/dd><dt>コンテキスト<\/dt><dd>顧客の声<\/dd><dt>主な項目<\/dt><dd><span class=\"none\">未定<\/span><\/dd><\/dl>", "状態モデル:オーダー状態": "<dl><dt>状態<\/dt><dd><span class=\"chip\">受付済<\/span><span class=\"chip\">受理済<\/span><span class=\"chip\">入金待ち<\/span><span class=\"chip\">入金確認済<\/span><span class=\"chip\">入荷待ち<\/span><span class=\"chip\">出荷指示済<\/span><span class=\"chip\">出荷済<\/span><span class=\"chip\">完了<\/span><span class=\"chip\">キャンセル済<\/span><span class=\"chip\">返品受付済<\/span><\/dd><dt>移り変わり<\/dt><dd><span class=\"none\">どのUCでどの状態に移るかは、まだ決まっていません<\/span><\/dd><\/dl>", "状態モデル:商品状態": "<dl><dt>状態<\/dt><dd><span class=\"chip\">取扱中<\/span><span class=\"chip\">追加発注しない<\/span><span class=\"chip\">取扱終了<\/span><\/dd><dt>移り変わり<\/dt><dd><span class=\"none\">どのUCでどの状態に移るかは、まだ決まっていません<\/span><\/dd><\/dl>", "状態モデル:発注状態": "<dl><dt>状態<\/dt><dd><span class=\"chip\">発注済<\/span><span class=\"chip\">入荷済<\/span><\/dd><dt>移り変わり<\/dt><dd><span class=\"none\">どのUCでどの状態に移るかは、まだ決まっていません<\/span><\/dd><\/dl>"}</script>
+</main>
+</div>
+<dialog class="dg-pop" id="dg-pop" aria-labelledby="dg-pop-title">
+  <div class="pop-h"><span class="pop-kind" id="dg-pop-kind"></span><span class="pop-title" id="dg-pop-title"></span>
+    <button class="pop-close" type="button" aria-label="閉じる">×</button></div>
+  <div class="pop-b" id="dg-pop-body"></div>
+</dialog>
+<!--mermaid:start-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<script>
+(function () {
+  if (!window.mermaid) return;
+  var cs = getComputedStyle(document.documentElement);
+  function v(n) { return cs.getPropertyValue(n).trim(); }
+  var dark = cs.getPropertyValue("color-scheme").indexOf("dark") >= 0;
+  mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "base", fontFamily: v("--body"),
+    themeVariables: { darkMode: dark, background: v("--surface"), primaryColor: v("--accent-soft"), primaryTextColor: v("--ink"),
+      primaryBorderColor: v("--accent"), lineColor: v("--muted"), secondaryColor: v("--paper"), tertiaryColor: v("--paper"),
+      clusterBkg: v("--paper"), clusterBorder: v("--line"), edgeLabelBackground: v("--surface"), fontSize: "13px" } });
+  // UC複合図の情報・条件・状態モデルを押すと、中身を小窓に出す
+  var details = {};
+  try { details = JSON.parse(document.getElementById("dg-details").textContent); } catch (e) {}
+  var pop = document.getElementById("dg-pop");
+  pop.querySelector(".pop-close").addEventListener("click", function () { pop.close(); });
+  pop.addEventListener("click", function (ev) { if (ev.target === pop) pop.close(); });
+  function show(key) {
+    var i = key.indexOf(":");
+    document.getElementById("dg-pop-kind").textContent = key.slice(0, i);
+    document.getElementById("dg-pop-title").textContent = key.slice(i + 1);
+    document.getElementById("dg-pop-body").innerHTML = details[key];
+    pop.showModal();
+  }
+  function wire(pre) {
+    var fig = pre.closest("figure"), keys;
+    try { keys = JSON.parse(fig.getAttribute("data-keys") || "null"); } catch (e) { keys = null; }
+    if (!keys) return;
+    [].forEach.call(pre.querySelectorAll("g.node"), function (g) {
+      var m = /flowchart-([A-Za-z]+\d+)-\d+$/.exec(g.id || ""), key = m && keys[m[1]];
+      if (!key || !details[key]) return;
+      g.classList.add("has-detail");
+      g.setAttribute("tabindex", "0");
+      g.setAttribute("role", "button");
+      g.setAttribute("aria-label", key.replace(":", " ") + " の中身を見る");
+      g.addEventListener("click", function () { show(key); });
+      g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); show(key); } });
+    });
+  }
+  // 閉じた details の中の図は大きさを測れず崩れるので、開いたときに描く。
+  // mermaid.run は呼ぶたびに id を振り直して前の図とぶつかるので、id を振って1枚ずつ描く
+  var seq = 0, queue = Promise.resolve();
+  function draw(root) {
+    [].forEach.call(root.querySelectorAll("pre.mermaid:not([data-processed])"), function (n) {
+      var d = n.closest("details");
+      if (d && !d.open) return;
+      n.setAttribute("data-processed", "true");
+      queue = queue.then(function () {
+        return mermaid.render("dg" + (++seq), n.textContent).then(function (r) { n.innerHTML = r.svg; wire(n); });
+      }).catch(function () { n.removeAttribute("data-processed"); });
+    });
+  }
+  document.addEventListener("toggle", function (ev) { if (ev.target.open) draw(ev.target); }, true);
+  draw(document);
+})();
+</script>
+<!--mermaid:end-->
+<script>
+(function () {
+  var STORE = "rdra-prd:rdra-webapp";
+  function load() { try { return JSON.parse(localStorage.getItem(STORE) || "{}"); } catch (e) { return {}; } }
+  function save(v) { try { localStorage.setItem(STORE, JSON.stringify(v)); } catch (e) {} }
+  var memos = load();
+  var areas = Array.prototype.slice.call(document.querySelectorAll(".memo textarea"));
+  var out = document.getElementById("out");
+  var msg = document.getElementById("msg");
+  function grow(t) { t.style.height = "auto"; t.style.height = t.scrollHeight + 2 + "px"; t.classList.toggle("filled", !!t.value.trim()); }
+  function render() {
+    var today = new Date();
+    var lines = ["# 議事メモ(" + today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0") + ")", ""];
+    var n = 0;
+    areas.forEach(function (t) {
+      var v = t.value.trim();
+      if (!v) return;
+      n++;
+      lines.push("## " + t.dataset.label, "", v, "");
+    });
+    out.textContent = n ? lines.join("\n") : "まだメモはありません。各項目の「メモ」欄に書くと、ここにまとまります。";
+    return n ? lines.join("\n") : "";
+  }
+  areas.forEach(function (t) {
+    t.value = memos[t.dataset.key] || "";
+    grow(t);
+    t.addEventListener("input", function () {
+      memos[t.dataset.key] = t.value;
+      save(memos); grow(t); render();
+    });
+  });
+  render();
+  document.getElementById("copy").addEventListener("click", function () {
+    var text = render();
+    if (!text) { msg.textContent = "コピーするメモがありません"; return; }
+    function fallback() {
+      var r = document.createRange(); r.selectNodeContents(out);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      msg.textContent = "選択しました。Ctrl+C(⌘C)でコピーしてください";
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { msg.textContent = "コピーしました"; }, fallback);
+    } else { fallback(); }
+  });
+  var clearBtn = document.getElementById("clear"), armed = false;
+  clearBtn.addEventListener("click", function () {
+    if (!armed) { armed = true; clearBtn.textContent = "もう一度押すと消します"; setTimeout(function () { armed = false; clearBtn.textContent = "メモをすべて消す"; }, 4000); return; }
+    armed = false; clearBtn.textContent = "メモをすべて消す";
+    memos = {}; save(memos);
+    areas.forEach(function (t) { t.value = ""; grow(t); });
+    render(); msg.textContent = "メモを消しました";
+  });
+})();
+</script>
+</body>
+</html>
