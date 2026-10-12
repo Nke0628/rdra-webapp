@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "savedAt": "2026-10-12T01:35:28.342Z",
+  "answers": {
+    "Q-001": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-002": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-003": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-004": {
+      "choice": "C",
+      "note": ""
+    },
+    "Q-005": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-006": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-007": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-008": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-009": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-011": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-013": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-014": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-010": {
+      "choice": "A",
+      "note": ""
+    },
+    "Q-012": {
+      "choice": "",
+      "note": "rdra-webapp"
+    }
+  }
+}
