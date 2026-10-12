@@ -194,9 +194,9 @@
 </head>
 <body>
 <div class="wrap">
-<nav class="toc" aria-label="目次"><a href="#purpose">目的と背景</a><a href="#people">アクターと外部システム</a><a href="#reqs">要求</a><a href="#flows">BUC</a><a href="#info">情報</a><a href="#states">状態遷移</a><a href="#decided">これまでに決まったこと</a><a href="#open">議論したいこと</a><a href="#minutes">議事メモ</a></nav>
+<nav class="toc" aria-label="目次"><a href="#purpose">目的と背景</a><a href="#people">アクターと外部システム</a><a href="#reqs">要求</a><a href="#flows">業務フロー</a><a href="#info">情報</a><a href="#states">状態遷移</a><a href="#decided">これまでに決まったこと</a><a href="#open">議論したいこと</a><a href="#minutes">議事メモ</a></nav>
 <main>
-<header class="top"><div class="eyebrow">要件定義書(PRD)</div><h1>rdra-webapp</h1><div class="meta">2026年10月12日 17:13 時点</div><div class="stats"><span class="warn"><b>10</b>確認が必要なAIの仮説</span><span class="warn"><b>16</b>未解決の質問</span></div><details class="guide"><summary>この資料の読み方</summary><dl><dt>BUC(ビジネスユースケース)</dt><dd>一連の仕事の流れ(例: 利用を始める)。アクティビティを順番に並べたもの</dd><dt>アクティビティ</dt><dd>BUCの中の一つひとつの作業</dd><dt>UC(ユースケース)</dt><dd>アクティビティの中で、システムを使う部分</dd><dt>コンテキスト</dt><dd>役割の近い情報をまとめた単位</dd><dt>条件</dt><dd>UCがどう動くかを決めるビジネスルール</dd><dt>バリエーション</dt><dd>条件で使う種類・区分と、その値</dd></dl></details></header>
+<header class="top"><div class="eyebrow">要件定義書(PRD)</div><h1>rdra-webapp</h1><div class="meta">2026年10月12日 17:44 時点</div><div class="stats"><span class="warn"><b>10</b>確認が必要なAIの仮説</span><span class="warn"><b>16</b>未解決の質問</span></div><details class="guide"><summary>この資料の読み方</summary><dl><dt>BUC(ビジネスユースケース)</dt><dd>一連の仕事の流れ(例: 利用を始める)。アクティビティを順番に並べたもの</dd><dt>アクティビティ</dt><dd>BUCの中の一つひとつの作業</dd><dt>UC(ユースケース)</dt><dd>アクティビティの中で、システムを使う部分</dd><dt>コンテキスト</dt><dd>役割の近い情報をまとめた単位</dd><dt>条件</dt><dd>UCがどう動くかを決めるビジネスルール</dd><dt>バリエーション</dt><dd>条件で使う種類・区分と、その値</dd></dl></details></header>
 <section id="purpose"><h2>目的と背景</h2><h3>ゴール</h3><ul class="reqs"><li><span class="rid">G-01</span><div class="rbody"><div class="rtitle">輸入した商品をタイムリーに紹介し、Web で顧客に直接販売する</div><div class="rdesc">直営店での小売りに加え、はじめての通信販売を始める</div></div></li><li><span class="rid">G-02</span><div class="rbody"><div class="rtitle">顧客と直接つながり、商品に対する顧客の声をダイレクトに把握して商品開発につなげる</div><div class="rdesc">顧客のレビュー・感想を営業が集計して使う</div></div></li></ul><h3>初期要望</h3><div class="quote"><div class="qlabel">いちばん実現したいこと</div><p>輸入した商品をタイムリーに紹介し直接販売する。顧客と直接つながることで商品に対する顧客の声をダイレクトに把握し商品開発につなげる。</p></div><div class="quote"><div class="qlabel">背景</div><p>ABC商事は輸入販売の商社で、従来は直営店を数十店持ち、そこで小売りを行っている。新たに Web を使った通信販売を始める。通信販売はこの会社にとってはじめて。システム部門が中心となり、関係部署へのヒアリングで要望をまとめる。関係する部署: 顧客、経営者、営業、オーダー部門、物流、システム部門経営者は売上の状況を見る。システム部門はこのシステムの利用者ではない(保守のみ)。関係する既存システム: 入荷システム、出荷システム、決済システム経営層は、営業にはオーダー作業よりも戦略的な商品管理の仕事にシフトしてもらいたい。オーダー処理は新たにオーダー部門を用意して集約する。営業は、多様な顧客のニーズに沿えるように入金手段を多くしてほしい。物流は、既存の入庫、出庫システムとの連動を望んでいる。入庫、出庫システムは入荷システム、出荷システムと同じもの。システム部門は、保守性を考え使用する技術を統一したい。決済システム: 入金情報を通知する(決済会社の決めたフォーマットで Web サービスを呼び出す)。出荷システム: 出荷指示を受け付け、出荷作業の完了を通知する。入荷システム: 入荷商品の情報を通知する。配送会社が配送終了をメールで通知する。在庫切れのときは取引先に対して発注する。取引先への発注(在庫切れ時の追加発注、新規商品の発注)はこのシステムで記録し、発注先への送付は従来どおりの手段で行う。物流の出荷は朝、昼、夕方の各3時間単位の締め毎に行う。商品の入荷は午後にまとめて送られてくる。</p></div><div class="quote"><div class="qlabel">やらないこと</div><p>直営店での販売・店舗の在庫。直営店と Web の在庫は共有しない。配送会社とのシステム連携(配送終了はオーダー部門がメールを見て完了にする)。</p></div><div class="memo"><label for="memo-purpose">メモ</label><textarea id="memo-purpose" data-key="purpose" data-label="目的と背景" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="people"><h2>アクターと外部システム</h2><figure class="dg"><pre class="mermaid">flowchart LR
   sys([&quot;rdra-webapp&quot;])
   a1[&quot;顧客&quot;] --- sys
@@ -207,7 +207,7 @@
   sys --- e6[[&quot;決済システム&quot;]]
   sys --- e7[[&quot;出荷システム&quot;]]
   sys --- e8[[&quot;入荷システム&quot;]]
-  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>システムと、使う人・つながる他のシステム</figcaption></figure><h3>アクター</h3><div class="cards"><div class="card"><div class="card-h"><b>顧客</b></div><p>Web で商品を購入する人。会員登録しなくても購入できる</p></div><div class="card"><div class="card-h"><b>営業</b></div><p>取り扱い商品の登録・削除、売上の分析、品揃えの検討、新規商品の発注を行う</p></div><div class="card"><div class="card-h"><b>オーダー部門</b></div><p>オーダー処理を集約して行う(新設)。入金の確認、出荷指示、追加発注、返品の受付を行う</p></div><div class="card"><div class="card-h"><b>物流</b></div><p>出荷作業と入荷情報の入力を行う</p></div><div class="card"><div class="card-h"><b>経営者</b></div><p>売上の状況を見る</p></div></div><h3>外部システム</h3><div class="cards"><div class="card"><div class="card-h"><b>決済システム</b></div><p>入金情報を通知する(決済会社の決めたフォーマットで Web サービスを呼び出す)</p></div><div class="card"><div class="card-h"><b>出荷システム</b></div><p>既存。出荷指示を受け付け、出荷作業の完了を通知する</p></div><div class="card"><div class="card-h"><b>入荷システム</b></div><p>既存。入荷商品の情報を通知する</p></div></div><div class="memo"><label for="memo-people">メモ</label><textarea id="memo-people" data-key="people" data-label="アクターと外部システム" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="reqs"><h2>要求</h2><p class="lead">システムに求めることを「機能」「非機能」「方針」に分けています。</p><h3>機能</h3><p class="lead">システムでできること。画面で入力する、計算する、表示するなど</p><ul class="reqs"><li><span class="rid">R-01</span><div class="rbody"><div class="rtitle">顧客が Web で商品を選び、決済情報と送付先を入力して購入できる</div><div class="rdesc">カートに追加してから購入指示を行う</div></div></li><li><span class="rid">R-02</span><div class="rbody"><div class="rtitle">営業が仕入れた商品を Web の取り扱い商品として登録・削除できる</div><div class="rdesc">輸入した商品をタイムリーに紹介する</div></div></li><li><span class="rid">R-03</span><div class="rbody"><div class="rtitle">顧客がオーダー商品の現在の状態を確認できる</div></div></li><li><span class="rid">R-04</span><div class="rbody"><div class="rtitle">顧客が会員登録できる。会員登録しなくても購入できる</div></div></li><li><span class="rid">R-05</span><div class="rbody"><div class="rtitle">顧客が出荷前のオーダーを Web でキャンセルできる</div></div></li><li><span class="rid">R-06</span><div class="rbody"><div class="rtitle">決済システムの入金情報通知を受けてオーダーと照合し、照合できないもの・金額が異なるものだけオーダー部門が確認する</div></div></li><li><span class="rid">R-07</span><div class="rbody"><div class="rtitle">出荷指示の前にオーダー別の在庫を確認し、在庫切れのオーダーを入荷待ちにする</div></div></li><li><span class="rid">R-08</span><div class="rbody"><div class="rtitle">入荷システムから送られる入荷情報で、入荷待ちのオーダーの入荷待ちを解除する</div></div></li><li><span class="rid">R-09</span><div class="rbody"><div class="rtitle">入金が確認されたオーダーの出荷指示を、そのまま出荷システムへ連携する</div></div></li><li><span class="rid">R-10</span><div class="rbody"><div class="rtitle">取引先への発注(在庫切れ時の追加発注、新規商品の発注)を記録する</div><div class="rdesc">発注先への送付は従来どおりの手段で行う</div></div></li><li><span class="rid">R-11</span><div class="rbody"><div class="rtitle">営業が商品の特性と売れた時期・売れた場所を管理し、売れた場所をマップ上に表示できる</div><div class="rdesc">売れた場所は送付先の地域</div></div></li><li><span class="rid">R-12</span><div class="rbody"><div class="rtitle">売上を週単位で集計し、月単位でも見られる</div><div class="rdesc">営業が週単位で分析し、次週以降の品揃えを検討する</div></div></li><li><span class="rid">R-13</span><div class="rbody"><div class="rtitle">購入した顧客が商品のレビュー・感想を Web で投稿できる</div></div></li><li><span class="rid">R-14</span><div class="rbody"><div class="rtitle">営業が商品ごとにレビュー・感想を集計し、商品開発の検討に使える</div></div></li><li><span class="rid">R-15</span><div class="rbody"><div class="rtitle">営業が、今後追加発注しない在庫商品をマークし、売れ筋商品の在庫量を多くできる</div><div class="rdesc">在庫切れによる機会損失を無くす</div></div></li><li><span class="rid">R-16</span><div class="rbody"><div class="rtitle">経営者が売上の状況を見られる</div></div></li><li><span class="rid">R-17</span><div class="rbody"><div class="rtitle">多様な顧客のニーズに沿えるように、入金手段を多く用意する</div></div></li><li><span class="rid">R-21</span><div class="rbody"><div class="rtitle">オーダーを受理したことと支払い方法を顧客にメールで通知する</div></div></li><li><span class="rid">R-24</span><div class="rbody"><div class="rtitle">オーダー部門が配送会社からの配送終了のメール通知を確認し、オーダーを完了にできる</div><div class="rdesc">配送会社とのシステム連携はしない</div></div></li></ul><h3>非機能</h3><p class="lead">機能をどれだけ快適・安全に使えるか。速さ、使える端末、個人情報の守り方など</p><ul class="reqs"><li><span class="rid">R-19</span><div class="rbody"><div class="rtitle">保守性を考え、使用する技術を統一する</div></div></li></ul><h3>方針</h3><p class="lead">システムの作り方ではなく、事業・運営として決めること。料金、だれ向けのサービスか、データをいつ消すか、制度改正への追従など</p><ul class="reqs"><li><span class="rid">R-18</span><div class="rbody"><div class="rtitle">オーダー処理は新たに用意するオーダー部門に集約し、営業は戦略的な商品管理の仕事にシフトする</div></div></li><li><span class="rid">R-20</span><div class="rbody"><div class="rtitle">直営店と Web の在庫は共有しない。直営店での販売・店舗の在庫は対象外</div></div></li><li><span class="rid">R-22</span><div class="rbody"><div class="rtitle">入金額が不足する場合は差額の追加支払いを依頼し、多すぎる場合は差額を返金する</div><div class="rdesc">オーダー部門が顧客にメール・電話で確認する</div></div></li><li><span class="rid">R-23</span><div class="rbody"><div class="rtitle">返品はオーダー部門がメールもしくは電話で受け付ける</div></div></li><li><span class="rid">R-25</span><div class="rbody"><div class="rtitle">出荷は朝・昼・夕方の各3時間単位の締め毎に行う</div></div></li></ul><div class="memo"><label for="memo-reqs">メモ</label><textarea id="memo-reqs" data-key="reqs" data-label="要求" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="flows"><h2>BUC</h2><p class="lead">最初の図が業務のつながりです。業務ごとに、BUCのつながりの図、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。アクティビティごとの詳細の図では、情報・条件・状態モデルをクリックすると中身が見られます。</p><figure class="dg"><pre class="mermaid">flowchart LR
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>システムと、使う人・つながる他のシステム</figcaption></figure><h3>アクター</h3><div class="cards"><div class="card"><div class="card-h"><b>顧客</b></div><p>Web で商品を購入する人。会員登録しなくても購入できる</p></div><div class="card"><div class="card-h"><b>営業</b></div><p>取り扱い商品の登録・削除、売上の分析、品揃えの検討、新規商品の発注を行う</p></div><div class="card"><div class="card-h"><b>オーダー部門</b></div><p>オーダー処理を集約して行う(新設)。入金の確認、出荷指示、追加発注、返品の受付を行う</p></div><div class="card"><div class="card-h"><b>物流</b></div><p>出荷作業と入荷情報の入力を行う</p></div><div class="card"><div class="card-h"><b>経営者</b></div><p>売上の状況を見る</p></div></div><h3>外部システム</h3><div class="cards"><div class="card"><div class="card-h"><b>決済システム</b></div><p>入金情報を通知する(決済会社の決めたフォーマットで Web サービスを呼び出す)</p></div><div class="card"><div class="card-h"><b>出荷システム</b></div><p>既存。出荷指示を受け付け、出荷作業の完了を通知する</p></div><div class="card"><div class="card-h"><b>入荷システム</b></div><p>既存。入荷商品の情報を通知する</p></div></div><div class="memo"><label for="memo-people">メモ</label><textarea id="memo-people" data-key="people" data-label="アクターと外部システム" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="reqs"><h2>要求</h2><p class="lead">システムに求めることを「機能」「非機能」「方針」に分けています。</p><h3>機能</h3><p class="lead">システムでできること。画面で入力する、計算する、表示するなど</p><ul class="reqs"><li><span class="rid">R-01</span><div class="rbody"><div class="rtitle">顧客が Web で商品を選び、決済情報と送付先を入力して購入できる</div><div class="rdesc">カートに追加してから購入指示を行う</div></div></li><li><span class="rid">R-02</span><div class="rbody"><div class="rtitle">営業が仕入れた商品を Web の取り扱い商品として登録・削除できる</div><div class="rdesc">輸入した商品をタイムリーに紹介する</div></div></li><li><span class="rid">R-03</span><div class="rbody"><div class="rtitle">顧客がオーダー商品の現在の状態を確認できる</div></div></li><li><span class="rid">R-04</span><div class="rbody"><div class="rtitle">顧客が会員登録できる。会員登録しなくても購入できる</div></div></li><li><span class="rid">R-05</span><div class="rbody"><div class="rtitle">顧客が出荷前のオーダーを Web でキャンセルできる</div></div></li><li><span class="rid">R-06</span><div class="rbody"><div class="rtitle">決済システムの入金情報通知を受けてオーダーと照合し、照合できないもの・金額が異なるものだけオーダー部門が確認する</div></div></li><li><span class="rid">R-07</span><div class="rbody"><div class="rtitle">出荷指示の前にオーダー別の在庫を確認し、在庫切れのオーダーを入荷待ちにする</div></div></li><li><span class="rid">R-08</span><div class="rbody"><div class="rtitle">入荷システムから送られる入荷情報で、入荷待ちのオーダーの入荷待ちを解除する</div></div></li><li><span class="rid">R-09</span><div class="rbody"><div class="rtitle">入金が確認されたオーダーの出荷指示を、そのまま出荷システムへ連携する</div></div></li><li><span class="rid">R-10</span><div class="rbody"><div class="rtitle">取引先への発注(在庫切れ時の追加発注、新規商品の発注)を記録する</div><div class="rdesc">発注先への送付は従来どおりの手段で行う</div></div></li><li><span class="rid">R-11</span><div class="rbody"><div class="rtitle">営業が商品の特性と売れた時期・売れた場所を管理し、売れた場所をマップ上に表示できる</div><div class="rdesc">売れた場所は送付先の地域</div></div></li><li><span class="rid">R-12</span><div class="rbody"><div class="rtitle">売上を週単位で集計し、月単位でも見られる</div><div class="rdesc">営業が週単位で分析し、次週以降の品揃えを検討する</div></div></li><li><span class="rid">R-13</span><div class="rbody"><div class="rtitle">購入した顧客が商品のレビュー・感想を Web で投稿できる</div></div></li><li><span class="rid">R-14</span><div class="rbody"><div class="rtitle">営業が商品ごとにレビュー・感想を集計し、商品開発の検討に使える</div></div></li><li><span class="rid">R-15</span><div class="rbody"><div class="rtitle">営業が、今後追加発注しない在庫商品をマークし、売れ筋商品の在庫量を多くできる</div><div class="rdesc">在庫切れによる機会損失を無くす</div></div></li><li><span class="rid">R-16</span><div class="rbody"><div class="rtitle">経営者が売上の状況を見られる</div></div></li><li><span class="rid">R-17</span><div class="rbody"><div class="rtitle">多様な顧客のニーズに沿えるように、入金手段を多く用意する</div></div></li><li><span class="rid">R-21</span><div class="rbody"><div class="rtitle">オーダーを受理したことと支払い方法を顧客にメールで通知する</div></div></li><li><span class="rid">R-24</span><div class="rbody"><div class="rtitle">オーダー部門が配送会社からの配送終了のメール通知を確認し、オーダーを完了にできる</div><div class="rdesc">配送会社とのシステム連携はしない</div></div></li></ul><h3>非機能</h3><p class="lead">機能をどれだけ快適・安全に使えるか。速さ、使える端末、個人情報の守り方など</p><ul class="reqs"><li><span class="rid">R-19</span><div class="rbody"><div class="rtitle">保守性を考え、使用する技術を統一する</div></div></li></ul><h3>方針</h3><p class="lead">システムの作り方ではなく、事業・運営として決めること。料金、だれ向けのサービスか、データをいつ消すか、制度改正への追従など</p><ul class="reqs"><li><span class="rid">R-18</span><div class="rbody"><div class="rtitle">オーダー処理は新たに用意するオーダー部門に集約し、営業は戦略的な商品管理の仕事にシフトする</div></div></li><li><span class="rid">R-20</span><div class="rbody"><div class="rtitle">直営店と Web の在庫は共有しない。直営店での販売・店舗の在庫は対象外</div></div></li><li><span class="rid">R-22</span><div class="rbody"><div class="rtitle">入金額が不足する場合は差額の追加支払いを依頼し、多すぎる場合は差額を返金する</div><div class="rdesc">オーダー部門が顧客にメール・電話で確認する</div></div></li><li><span class="rid">R-23</span><div class="rbody"><div class="rtitle">返品はオーダー部門がメールもしくは電話で受け付ける</div></div></li><li><span class="rid">R-25</span><div class="rbody"><div class="rtitle">出荷は朝・昼・夕方の各3時間単位の締め毎に行う</div></div></li></ul><div class="memo"><label for="memo-reqs">メモ</label><textarea id="memo-reqs" data-key="reqs" data-label="要求" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></section><section id="flows"><h2>業務フロー</h2><p class="lead">最初の図は、業務ごとにどのアクター・外部システムが関わるかを示しています。業務ごとに、BUCと関わるアクター・外部システムの図、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。アクティビティごとの詳細の図では、情報・条件・状態モデルをクリックすると中身が見られます。</p><figure class="dg"><pre class="mermaid">flowchart LR
   g1[&quot;会員管理&quot;]
   g2[&quot;オーダー業務&quot;]
   g3[&quot;出荷業務&quot;]
@@ -216,59 +216,64 @@
   g6[&quot;商品企画&quot;]
   g7[&quot;売上の把握&quot;]
   g8[&quot;顧客の声の把握&quot;]
-  g1 --&gt; g2
-  g2 --&gt; g3
-  g2 --&gt; g4
-  g2 --&gt; g5
-  g2 --&gt; g6
-  g2 --&gt; g8
-  g6 --&gt; g7
+  a9[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] -.- g1
+  a9[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] --- g2
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- g2
+  a11[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;物流&quot;] -.- g2
+  g2 --- e12[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;決済システム&quot;]]
+  g2 --- e13[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;出荷システム&quot;]]
+  g2 --- e14[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;入荷システム&quot;]]
+  a11[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;物流&quot;] --- g3
+  g3 --- e13[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;出荷システム&quot;]]
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- g4
+  a15[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- g4
+  a11[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;物流&quot;] --- g4
+  g4 --- e14[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;入荷システム&quot;]]
+  a15[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- g5
+  a15[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- g6
+  a16[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;経営者&quot;] -.- g7
+  a9[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] --- g8
+  a15[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- g8
+  class a9,a10,a11,a15,a16 kActor
+  class e12,e13,e14 kExt
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
-  class g1,g7 hyp</pre><figcaption>業務のつながり。矢印は、その業務で用意した情報を矢印の先の業務で使うところ</figcaption></figure><h3>会員管理</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;顧客&quot;]
-    b2([&quot;会員登録する&quot;])
-  end
+  class g1,g7 hyp</pre><figcaption>業務と、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><h3>会員管理</h3><figure class="dg"><pre class="mermaid">flowchart LR
+  b1([&quot;会員登録する&quot;])
+  a2[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] -.- b1
+  class a2 kActor
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
-  class b2 hyp</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>会員登録する</b><span class="sub"><span class="chip req">R-04</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  class b1 hyp</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>会員登録する</b><span class="sub"><span class="chip req">R-04</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;顧客&quot;]
     act2[&quot;会員情報を登録する&quot;]
   end
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
   class act2 hyp</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">会員情報を登録する</span><span class="chip who">顧客</span></div><div class="sub">扱う情報: <span class="chip info">顧客</span></div></li></ol></details><div class="memo"><label for="memo-buc-会員登録する">メモ</label><textarea id="memo-buc-会員登録する" data-key="buc-会員登録する" data-label="会員登録する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>オーダー業務</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;顧客&quot;]
-    b2([&quot;注文を受け付ける&quot;])
-    b3([&quot;入金を確認して出荷を指示する&quot;])
-    b4([&quot;出荷前のオーダーをキャンセルする&quot;])
-  end
-  subgraph l5[&quot;オーダー部門&quot;]
-    b6([&quot;オーダーを受理する&quot;])
-    b7([&quot;入荷したオーダーの出荷を指示する&quot;])
-    b8([&quot;配送終了を確認してオーダーを完了する&quot;])
-    b9([&quot;入金差異を解消する&quot;])
-    b10([&quot;返品を受け付ける&quot;])
-  end
-  b2 --&gt; b3
-  b3 --&gt; b4
-  b6 --&gt; b7
-  b7 --&gt; b8
-  b8 --&gt; b9
-  b9 --&gt; b10
-  b6 -.-&gt;|&quot;オーダー、顧客&quot;| b2
-  b6 -.-&gt;|&quot;オーダー&quot;| b3
-  b6 -.-&gt;|&quot;オーダー&quot;| b4
-  b7 -.-&gt;|&quot;オーダー&quot;| b2
-  b7 -.-&gt;|&quot;オーダー、在庫、出荷指示&quot;| b3
-  b7 -.-&gt;|&quot;オーダー&quot;| b4
-  b8 -.-&gt;|&quot;オーダー&quot;| b2
-  b8 -.-&gt;|&quot;オーダー&quot;| b3
-  b8 -.-&gt;|&quot;オーダー&quot;| b4
-  b9 -.-&gt;|&quot;オーダー&quot;| b2
-  b9 -.-&gt;|&quot;入金、オーダー&quot;| b3
-  b9 -.-&gt;|&quot;入金、オーダー&quot;| b4
-  b10 -.-&gt;|&quot;オーダー&quot;| b2
-  b10 -.-&gt;|&quot;オーダー、入金、在庫&quot;| b3
-  b10 -.-&gt;|&quot;オーダー、入金&quot;| b4
-  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>注文を受け付ける</b><span class="sub"><span class="chip req">R-01</span><span class="chip req">R-03</span><span class="chip req">R-17</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  b1([&quot;注文を受け付ける&quot;])
+  b2([&quot;オーダーを受理する&quot;])
+  b3([&quot;入金を確認して出荷を指示する&quot;])
+  b4([&quot;入荷したオーダーの出荷を指示する&quot;])
+  b5([&quot;配送終了を確認してオーダーを完了する&quot;])
+  b6([&quot;出荷前のオーダーをキャンセルする&quot;])
+  b7([&quot;入金差異を解消する&quot;])
+  b8([&quot;返品を受け付ける&quot;])
+  a9[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] --- b1
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- b2
+  a9[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] --- b3
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- b3
+  b3 --- e11[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;決済システム&quot;]]
+  b3 --- e12[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;出荷システム&quot;]]
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- b4
+  b4 --- e13[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;入荷システム&quot;]]
+  b4 --- e12[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;出荷システム&quot;]]
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- b5
+  a9[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] --- b6
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] -.- b6
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- b7
+  a10[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- b8
+  a14[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;物流&quot;] -.- b8
+  class a9,a10,a14 kActor
+  class e11,e12,e13 kExt
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>注文を受け付ける</b><span class="sub"><span class="chip req">R-01</span><span class="chip req">R-03</span><span class="chip req">R-17</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;顧客&quot;]
     direction TB
     act2[&quot;購入する商品を選ぶ&quot;]
@@ -353,10 +358,12 @@
   act3 --&gt; act5
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
   class act3,act5 hyp</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">返品をメールもしくは電話で受け付ける</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">返品</span><span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">返品された代金を返金する</span><span class="chip who">オーダー部門</span></div><div class="sub">扱う情報: <span class="chip info">返品</span><span class="chip info">入金</span></div></li><li><div class="step-h"><span class="step-name">返品された商品を在庫に戻す</span><span class="chip who">物流</span></div><div class="sub">扱う情報: <span class="chip info">返品</span><span class="chip info">在庫</span></div></li></ol></details><div class="memo"><label for="memo-buc-返品を受け付ける">メモ</label><textarea id="memo-buc-返品を受け付ける" data-key="buc-返品を受け付ける" data-label="返品を受け付ける" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>出荷業務</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;物流&quot;]
-    b2([&quot;締め毎に出荷する&quot;])
-  end
-  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>締め毎に出荷する</b><span class="sub"><span class="chip req">R-09</span><span class="chip req">R-20</span><span class="chip req">R-25</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  b1([&quot;締め毎に出荷する&quot;])
+  a2[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;物流&quot;] --- b1
+  b1 --- e3[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;出荷システム&quot;]]
+  class a2 kActor
+  class e3 kExt
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>締め毎に出荷する</b><span class="sub"><span class="chip req">R-09</span><span class="chip req">R-20</span><span class="chip req">R-25</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;物流&quot;]
     act2[&quot;締め毎に出荷作業を行う&quot;]
   end
@@ -367,19 +374,16 @@
   act2 --&gt; act4
   act4 --&gt; act5
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">締め毎に出荷作業を行う</span><span class="chip who">物流</span><span class="chip who">出荷システム</span></div><div class="sub">扱う情報: <span class="chip info">出荷指示</span></div></li><li><div class="step-h"><span class="step-name">出荷作業の完了を通知する</span><span class="chip who">出荷システム</span></div><div class="sub">扱う情報: <span class="chip info">出荷指示</span><span class="chip info">オーダー</span></div></li><li><div class="step-h"><span class="step-name">出荷した商品を在庫から引く</span><span class="chip who">出荷システム</span></div><div class="sub">扱う情報: <span class="chip info">出荷指示</span><span class="chip info">在庫</span></div></li></ol></details><div class="memo"><label for="memo-buc-締め毎に出荷する">メモ</label><textarea id="memo-buc-締め毎に出荷する" data-key="buc-締め毎に出荷する" data-label="締め毎に出荷する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>発注業務</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;オーダー部門&quot;]
-    b2([&quot;在庫切れの商品を追加発注する&quot;])
-  end
-  subgraph l3[&quot;営業&quot;]
-    b4([&quot;新規商品を発注する&quot;])
-  end
-  subgraph l5[&quot;物流&quot;]
-    b6([&quot;入荷を発注と突き合わせる&quot;])
-  end
-  b4 -.-&gt;|&quot;発注、取引先、商品&quot;| b2
-  b6 -.-&gt;|&quot;発注&quot;| b2
-  b6 -.-&gt;|&quot;発注&quot;| b4
-  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>在庫切れの商品を追加発注する</b><span class="sub"><span class="chip req">R-10</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  b1([&quot;在庫切れの商品を追加発注する&quot;])
+  b2([&quot;新規商品を発注する&quot;])
+  b3([&quot;入荷を発注と突き合わせる&quot;])
+  a4[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;オーダー部門&quot;] --- b1
+  a5[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- b2
+  a6[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;物流&quot;] --- b3
+  b3 --- e7[[&quot;&lt;small&gt;外部システム&lt;/small&gt;&lt;br/&gt;入荷システム&quot;]]
+  class a4,a5,a6 kActor
+  class e7 kExt
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>在庫切れの商品を追加発注する</b><span class="sub"><span class="chip req">R-10</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;オーダー部門&quot;]
     act2[&quot;取引先に追加発注する&quot;]
   end
@@ -398,14 +402,14 @@
   act2 --&gt; act4
   act4 --&gt; act5
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">入荷情報を入荷システムに入力する</span><span class="chip who">物流</span><span class="chip who">入荷システム</span></div><div class="sub">扱う情報: <span class="chip info">入荷</span></div></li><li><div class="step-h"><span class="step-name">入荷情報を発注と突き合わせる</span><span class="chip who">入荷システム</span></div><div class="sub">扱う情報: <span class="chip info">入荷</span><span class="chip info">発注</span></div></li><li><div class="step-h"><span class="step-name">入荷した商品を在庫に加える</span><span class="chip who">入荷システム</span></div><div class="sub">扱う情報: <span class="chip info">入荷</span><span class="chip info">在庫</span></div></li></ol></details><div class="memo"><label for="memo-buc-入荷を発注と突き合わせる">メモ</label><textarea id="memo-buc-入荷を発注と突き合わせる" data-key="buc-入荷を発注と突き合わせる" data-label="入荷を発注と突き合わせる" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>商品管理</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;営業&quot;]
-    b2([&quot;取り扱い商品を登録・削除する&quot;])
-    b3([&quot;追加発注しない在庫商品をマークする&quot;])
-    b4([&quot;売れ筋商品の在庫量を多くする&quot;])
-  end
-  b2 --&gt; b3
-  b3 --&gt; b4
-  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>取り扱い商品を登録・削除する</b><span class="sub"><span class="chip req">R-02</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  b1([&quot;取り扱い商品を登録・削除する&quot;])
+  b2([&quot;追加発注しない在庫商品をマークする&quot;])
+  b3([&quot;売れ筋商品の在庫量を多くする&quot;])
+  a4[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- b1
+  a4[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- b2
+  a4[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- b3
+  class a4 kActor
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>取り扱い商品を登録・削除する</b><span class="sub"><span class="chip req">R-02</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;営業&quot;]
     act2[&quot;取り扱い商品を登録する&quot;]
     act3[&quot;取り扱い商品を削除する&quot;]
@@ -420,10 +424,10 @@
     act2[&quot;売れ筋商品の在庫量を多くする&quot;]
   end
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">売れ筋商品の在庫量を多くする</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">在庫</span><span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-売れ筋商品の在庫量を多くする">メモ</label><textarea id="memo-buc-売れ筋商品の在庫量を多くする" data-key="buc-売れ筋商品の在庫量を多くする" data-label="売れ筋商品の在庫量を多くする" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>商品企画</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;営業&quot;]
-    b2([&quot;週単位で売上を分析し品揃えを検討する&quot;])
-  end
-  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>週単位で売上を分析し品揃えを検討する</b><span class="sub"><span class="chip req">R-11</span><span class="chip req">R-12</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  b1([&quot;週単位で売上を分析し品揃えを検討する&quot;])
+  a2[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- b1
+  class a2 kActor
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>週単位で売上を分析し品揃えを検討する</b><span class="sub"><span class="chip req">R-11</span><span class="chip req">R-12</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;営業&quot;]
     act2[&quot;売上を週単位・月単位で集計する&quot;]
     act3[&quot;売れた場所をマップ上で見る&quot;]
@@ -434,24 +438,22 @@
   act3 --&gt; act4
   act4 --&gt; act5
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">売上を週単位・月単位で集計する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">売上</span><span class="chip info">商品</span></div></li><li><div class="step-h"><span class="step-name">売れた場所をマップ上で見る</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">売上</span></div></li><li><div class="step-h"><span class="step-name">売上情報を場所と商品の特性で分析する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">売上</span><span class="chip info">商品</span></div></li><li><div class="step-h"><span class="step-name">次週以降の商品の品揃えを検討する</span><span class="chip who">営業</span></div><div class="sub">扱う情報: <span class="chip info">商品</span></div></li></ol></details><div class="memo"><label for="memo-buc-週単位で売上を分析し品揃えを検討する">メモ</label><textarea id="memo-buc-週単位で売上を分析し品揃えを検討する" data-key="buc-週単位で売上を分析し品揃えを検討する" data-label="週単位で売上を分析し品揃えを検討する" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>売上の把握</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;経営者&quot;]
-    b2([&quot;売上の状況を見る&quot;])
-  end
+  b1([&quot;売上の状況を見る&quot;])
+  a2[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;経営者&quot;] -.- b1
+  class a2 kActor
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
-  class b2 hyp</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>売上の状況を見る</b><span class="sub"><span class="chip req">R-16</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  class b1 hyp</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>売上の状況を見る</b><span class="sub"><span class="chip req">R-16</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;経営者&quot;]
     act2[&quot;売上の状況を見る&quot;]
   end
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
   class act2 hyp</pre></figure><details class="more"><summary>アクティビティごとの詳細</summary><ol class="steps"><li><div class="step-h"><span class="step-name">売上の状況を見る</span><span class="chip who">経営者</span></div><div class="sub">扱う情報: <span class="chip info">売上</span></div></li></ol></details><div class="memo"><label for="memo-buc-売上の状況を見る">メモ</label><textarea id="memo-buc-売上の状況を見る" data-key="buc-売上の状況を見る" data-label="売上の状況を見る" rows="1" placeholder="MTGで出た意見・決まったこと"></textarea></div></div><h3>顧客の声の把握</h3><figure class="dg"><pre class="mermaid">flowchart LR
-  subgraph l1[&quot;顧客&quot;]
-    b2([&quot;レビュー・感想を投稿する&quot;])
-  end
-  subgraph l3[&quot;営業&quot;]
-    b4([&quot;レビュー・感想を集計し商品開発に使う&quot;])
-  end
-  b4 -.-&gt;|&quot;レビュー、商品&quot;| b2
-  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ</figcaption></figure><div class="flow"><div class="flow-h"><b>レビュー・感想を投稿する</b><span class="sub"><span class="chip req">R-13</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
+  b1([&quot;レビュー・感想を投稿する&quot;])
+  b2([&quot;レビュー・感想を集計し商品開発に使う&quot;])
+  a3[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;顧客&quot;] --- b1
+  a4[&quot;&lt;small&gt;アクター&lt;/small&gt;&lt;br/&gt;営業&quot;] --- b2
+  class a3,a4 kActor
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e</pre><figcaption>BUCと、関わるアクター・外部システム。点線は仮説のつながり</figcaption></figure><div class="flow"><div class="flow-h"><b>レビュー・感想を投稿する</b><span class="sub"><span class="chip req">R-13</span></span></div><figure class="dg"><pre class="mermaid">flowchart TB
   subgraph l1[&quot;顧客&quot;]
     act2[&quot;購入した商品のレビュー・感想を投稿する&quot;]
   end

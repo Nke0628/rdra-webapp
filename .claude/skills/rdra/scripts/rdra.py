@@ -1408,89 +1408,46 @@ def prd_info_diagram(m):
     return mermaid(b)
 
 
-def prd_business_flow(m):
-    """業務をつなげた図。表の順に並べ、ある業務で初めて出てくる情報を
-    別の業務で使うところを矢印でつなぐ。"""
+def prd_party_diagram(nodes):
+    """nodes(ノードID種別, 名前, 図形の左右の記号, 行) を中央に置き、関わるアクター(左)・
+    外部システム(右)と線でつなぐ(向きは持たない)。仮説の行でしか関わらないつながりは点線にする。"""
     ids = Ids()
-    order, infos, first = [], {}, {}
-    for (g, buc), rows in m.bucs.items():
-        if g not in order:
-            order.append(g)
-            infos[g] = []
-        for r in rows:
-            for i in multi(r["情報"]):
-                first.setdefault(i, g)
-                if i not in infos[g]:
-                    infos[g].append(i)
     b = ["flowchart LR"]
-    hyps = []
-    for g in order:
-        n = ids("g", g)
-        b.append(f"  {n}[{ql(g)}]")
-        if all(is_hyp(r) for (gg, _), rows in m.bucs.items() if gg == g for r in rows):
+    hyps, links = [], []
+    for kind, name, (l, r), rows in nodes:
+        n = ids(kind, name)
+        b.append(f"  {n}{l}{ql(name)}{r}")
+        if rows and all(is_hyp(x) for x in rows):
             hyps.append(n)
-    linked = set()
-    for g in order:
-        for other in order:
-            if other == g:
-                continue
-            shared = [i for i in infos[other] if first[i] == g]
-            if not shared:
-                continue
-            b.append(f"  {ids('g', g)} --> {ids('g', other)}")
-            linked.add(frozenset((g, other)))
-    # 情報でつながらない業務は、表の順でつなぐ
-    for a, nxt in zip(order, order[1:]):
-        if not any(a in p for p in linked) or not any(nxt in p for p in linked):
-            if frozenset((a, nxt)) not in linked:
-                b.append(f"  {ids('g', a)} --> {ids('g', nxt)}")
+        for col, k in [("アクター", "a"), ("外部システム", "e")]:
+            for w in dict.fromkeys(w for x in rows for w in multi(x[col])):
+                hyp = all(is_hyp(x) for x in rows if w in multi(x[col]))
+                links.append((k, w, n, hyp))
+    for k, w, n, hyp in links:
+        line = "-.-" if hyp else "---"
+        if k == "a":
+            b.append(f"  {ids('a', w)}[{kl('アクター', w)}] {line} {n}")
+        else:
+            b.append(f"  {n} {line} {ids('e', w)}[[{kl('外部システム', w)}]]")
+    b += kind_classes(ids)
     b.append("  " + HYP_STYLE)
     if hyps:
         b.append(f"  class {','.join(hyps)} hyp")
     return mermaid(b)
+
+
+def prd_business_flow(m):
+    """業務と、その業務に関わるアクター・外部システムの図。"""
+    rows_g = {}
+    for (g, _), rows in m.bucs.items():
+        rows_g.setdefault(g, []).extend(rows)
+    return prd_party_diagram([("g", g, ("[", "]"), rows) for g, rows in rows_g.items()])
 
 
 def prd_overall_flow(m, group=None):
-    """BUCをつなげた流れ(group を渡すとその業務のBUCだけ)。主なアクターごとのレーンに
-    表の順で並べ、別のレーンのBUCとは共有する情報を点線でつなぐ。"""
-    ids = Ids()
-    lanes, infos = {}, {}
-    bucs_in = {k: v for k, v in m.bucs.items() if group is None or k[0] == group}
-    for (g, buc), rows in bucs_in.items():
-        who = next((a for r in rows for a in multi(r["アクター"])), None) or "(未定)"
-        lanes.setdefault(who, [])
-        if buc not in lanes[who]:
-            lanes[who].append(buc)
-        infos.setdefault(buc, [])
-        for r in rows:
-            for i in multi(r["情報"]):
-                if i not in infos[buc]:
-                    infos[buc].append(i)
-    b = ["flowchart LR"]
-    hyps = []
-    for lane, bucs in lanes.items():
-        b.append(f"  subgraph {ids('l', lane)}[{ql(lane)}]")
-        for buc in bucs:
-            n = ids("b", buc)
-            b.append(f"    {n}([{ql(buc)}])")
-            if all(is_hyp(r) for (g, bb), rows in bucs_in.items() if bb == buc for r in rows):
-                hyps.append(n)
-        b.append("  end")
-    for bucs in lanes.values():
-        for a, nxt in zip(bucs, bucs[1:]):
-            b.append(f"  {ids('b', a)} --> {ids('b', nxt)}")
-    order = list(lanes)
-    for li, lane in enumerate(order):
-        for other in order[li + 1:]:
-            for ob in lanes[other]:
-                for buc in lanes[lane]:
-                    shared = [i for i in infos[ob] if i in infos[buc]]
-                    if shared:
-                        b.append(f"  {ids('b', ob)} -.->|{ql('、'.join(shared))}| {ids('b', buc)}")
-    b.append("  " + HYP_STYLE)
-    if hyps:
-        b.append(f"  class {','.join(hyps)} hyp")
-    return mermaid(b)
+    """BUCと、そのBUCに関わるアクター・外部システムの図(group を渡すとその業務のBUCだけ)。"""
+    return prd_party_diagram([("b", buc, ("([", "])"), rows) for (g, buc), rows in m.bucs.items()
+                              if group is None or g == group])
 
 
 QREF_PAREN = re.compile(r"[((]\s*Q-\d+(?:\s*[、,・]\s*Q-\d+)*\s*[))]")
@@ -1679,13 +1636,13 @@ def build_prd(d):
 
     # 4. 業務フロー
     multi_g = len({g for g, _ in m.bucs}) > 1
-    html = prd_figure(prd_business_flow(m), "業務のつながり。矢印は、その業務で用意した情報を矢印の先の業務で使うところ") if multi_g else ""
+    html = prd_figure(prd_business_flow(m), "業務と、関わるアクター・外部システム。点線は仮説のつながり") if multi_g else ""
     by_g = {}
     for (g, buc), rows in m.bucs.items():
         by_g.setdefault(g, []).append((buc, rows))
     for g, bucs in by_g.items():
         html += f'<h3>{e(g)}</h3>'
-        html += prd_figure(prd_overall_flow(m, g), "BUCのつながり。点線は、別のアクターのBUCで用意した情報を使うところ")
+        html += prd_figure(prd_overall_flow(m, g), "BUCと、関わるアクター・外部システム。点線は仮説のつながり")
         for buc, rows in bucs:
             steps = []
             for r in rows:
@@ -1734,9 +1691,9 @@ def build_prd(d):
                      f'<span class="sub">{chips(reqids, "chip req")}</span></div>{fig}'
                      f'<details class="more"><summary>アクティビティごとの詳細</summary>'
                      f'<ol class="steps">{li or "<li class=none>まだアクティビティがありません</li>"}</ol></details>{memo(key, buc)}</div>')
-    section("flows", "BUC", html or '<p class="none">まだありません</p>',
-            ("最初の図が業務のつながりです。" if multi_g else "")
-            + "業務ごとに、BUCのつながりの図、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。"
+    section("flows", "業務フロー", html or '<p class="none">まだありません</p>',
+            ("最初の図は、業務ごとにどのアクター・外部システムが関わるかを示しています。" if multi_g else "")
+            + "業務ごとに、BUCと関わるアクター・外部システムの図、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。"
             "アクティビティごとの詳細の図では、情報・条件・状態モデルをクリックすると中身が見られます。")
 
     # 5. 情報
