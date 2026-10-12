@@ -1699,8 +1699,7 @@ def build_prd(d):
                      + (f'<div class="rdesc">{e(r["説明"])}</div>' if e(r["説明"]) else "")
                      + "</div></li>")
         html += "</ul>"
-    section("reqs", "要求", html + memo("reqs", "要求"),
-            "システムに求めることを「機能」「非機能」「方針」に分けています。")
+    section("reqs", "要求", html + memo("reqs", "要求"))
 
     # 4. 業務フロー
     multi_g = len({g for g, _ in m.bucs}) > 1
@@ -1761,10 +1760,7 @@ def build_prd(d):
                      f'<span class="sub">{chips(reqids, "chip req")}</span></div>{fig}'
                      f'<details class="more"><summary>アクティビティごとの詳細</summary>'
                      f'<ol class="steps">{li or "<li class=none>まだアクティビティがありません</li>"}</ol></details>{memo(key, buc)}</div>')
-    section("flows", "業務フロー", html or '<p class="none">まだありません</p>',
-            ("最初の図は、業務ごとにどのアクター・外部システムが関わるかを示しています。" if multi_g else "")
-            + "業務ごとに、BUCと関わるアクター・外部システムの図、業務全体のアクティビティの流れ(業務フロー)、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。"
-            "アクティビティごとの詳細の図では、情報・条件・状態モデルをクリックすると中身が見られます。")
+    section("flows", "業務フロー", html or '<p class="none">まだありません</p>')
 
     # 5. 情報
     html = prd_figure(prd_info_diagram(m), "矢印の文字は数の関係(例: 1対多 = 左の1つに右が複数)。点線は多対多") if m.infos else ""
