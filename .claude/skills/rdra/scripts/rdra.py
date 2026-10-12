@@ -34,7 +34,7 @@ TABLES = {
     "00_ゴール.md": {"ゴール": ["ID", "ゴール", "達成の判断基準", "説明"]},
     "01_要求.md": {"要求": ["ID", "種別", "要求", "説明", "ゴールID"]},
     "02_アクター.md": {"アクター": ["アクター", "説明"], "外部システム": ["外部システム", "説明"]},
-    "03_BUC.md": {"BUC": ["業務", "BUC", "要求ID", "アクティビティ", "アクター", "UC", "画面",
+    "03_BUC.md": {"BUC": ["業務", "BUC", "要求ID", "先", "アクティビティ", "次", "アクター", "UC", "画面",
                           "イベント", "外部システム", "情報", "条件"]},
     "04_情報.md": {"情報": ["コンテキスト", "情報", "説明", "属性", "状態モデル", "バリエーション"], "情報関連": ["情報", "関連先", "多重度"]},
     "05_状態.md": {"状態": ["コンテキスト", "状態モデル", "状態", "遷移先", "遷移UC"]},
@@ -49,6 +49,7 @@ Q_STATES = ["未回答", "回答済", "反映済", "許容"]
 UNRESOLVED = {"未回答", "回答済"}
 SEVERITIES = ["致命", "警告", "情報"]
 ANY_VALUE = "すべて"  # 条件の表で、軸の値を問わないことを表す
+FLOW_DOWN = "↓"  # 03_BUC の次の列で、下の行のアクティビティへ進むことを表す
 
 
 # ---------------------------------------------------------------- 読み込み
@@ -163,6 +164,45 @@ class Model:
         for r in self.t["状態"]:
             if r["状態モデル"]:
                 self.state_models.setdefault(r["状態モデル"], []).append(r)
+
+    def flow(self, group):
+        """業務の中のアクティビティのつながり。先・次の列から作る。
+        nodes: (BUC, アクティビティ) -> 行(表の順)。edges: [(元, 先)](元・先は nodes のキー)。
+        issues: [(コード, 対象, 内容, 場所)] 次のラベルの参照切れ・先のラベルの重複など。"""
+        nodes = {}
+        for r in self.buc_rows:
+            if r["業務"] == group and r["BUC"] and r["アクティビティ"]:
+                nodes.setdefault((r["BUC"], r["アクティビティ"]), []).append(r)
+        keys = list(nodes)
+        labels, issues = {}, []
+        for k, rows in nodes.items():
+            for lb in dict.fromkeys(x for r in rows for x in multi(r["先"])):
+                if lb == FLOW_DOWN:
+                    issues.append(("R17", f"{k[0]}/{k[1]}", f"先に「{FLOW_DOWN}」は書けない(ラベルを書く)", rows[0]["_loc"]))
+                elif lb in labels:
+                    issues.append(("S08", f"{k[0]}/{k[1]}", f"先のラベル「{lb}」が「{labels[lb][1]}」と重複している", rows[0]["_loc"]))
+                else:
+                    labels[lb] = k
+        edges, used = [], set()
+        for idx, (k, rows) in enumerate(nodes.items()):
+            for t in dict.fromkeys(x for r in rows for x in multi(r["次"])):
+                if t == FLOW_DOWN:
+                    if idx + 1 < len(keys):
+                        edges.append((k, keys[idx + 1]))
+                    else:
+                        issues.append(("R16", f"{k[0]}/{k[1]}", f"次が「{FLOW_DOWN}」だが、業務「{group}」の下の行にアクティビティがない", rows[0]["_loc"]))
+                elif t in labels:
+                    edges.append((k, labels[t]))
+                    used.add(t)
+                else:
+                    issues.append(("R16", f"{k[0]}/{k[1]}", f"次のラベル「{t}」が業務「{group}」の先の列にない", rows[0]["_loc"]))
+        for lb, k in labels.items():
+            if lb not in used:
+                issues.append(("S09", f"{k[0]}/{k[1]}", f"先のラベル「{lb}」を次で指しているアクティビティがない", nodes[k][0]["_loc"]))
+        return nodes, edges, issues
+
+    def groups(self):
+        return list(dict.fromkeys(g for g, _ in self.bucs))
 
     def all_rows(self):
         for rows in self.t.values():
@@ -331,6 +371,19 @@ def run_checks(m, qs, phase):
             for v in multi(r[col]):
                 if v not in pool:
                     add(code, 0, "致命", f"BUC:{v}", f"{col}「{v}」が定義されていない", r["_loc"])
+    for g in m.groups():
+        nodes, edges, issues = m.flow(g)
+        for code, target, msg, loc in issues:
+            add(code, 0, "警告" if code == "S09" else "致命", target, msg, loc)
+        outs = {a for a, _ in edges}
+        for (gg, buc), rows in m.bucs.items():
+            if gg != g:
+                continue
+            acts = [k for k in nodes if k[0] == buc]
+            for k in acts[:-1]:
+                if k not in outs:
+                    add("P113", 1, "警告", f"{k[0]}/{k[1]}",
+                        f"BUCの途中のアクティビティに次がない(下へ進むなら「{FLOW_DOWN}」、飛ぶならラベル)", nodes[k][0]["_loc"])
     for r in m.t["要求"]:
         for g in multi(r["ゴールID"]):
             if g not in m.goals:
@@ -663,29 +716,38 @@ def activities(rows):
     return acts
 
 
-def diagram_flow(rows, wrap=None):
-    """wrap: アクティビティがこの数を超えたらレーンの中を縦に並べる(PRD用)"""
+def diagram_flow(m, group, buc=None, wrap=None):
+    """アクティビティをアクターのレーンに置き、先・次の列のとおりに矢印でつなぐ。
+    buc を渡すとそのBUCだけを描き、ほかのBUCとのつながりは「BUC「X」へ/から」で示す。
+    wrap: アクティビティがこの数を超えたらレーンの中を縦に並べる(PRD用)"""
     ids = Ids()
-    acts = activities(rows)
+    nodes, edges, _ = m.flow(group)
+    acts = {k: rs for k, rs in nodes.items() if buc is None or k[0] == buc}
     lanes = {}
-    for act, rs in acts.items():
+    for k, rs in acts.items():
         who = multi(rs[0]["アクター"]) or multi(rs[0]["外部システム"]) or ["(未定)"]
-        lanes.setdefault(who[0], []).append(act)
+        lanes.setdefault(who[0], []).append(k)
     b = ["flowchart TB"]
     hyps = []
     for lane, acts_in in lanes.items():
         b.append(f"  subgraph {ids('l', lane)}[{ql(lane)}]")
         if wrap and len(acts) > wrap:
             b.append("    direction TB")
-        for act in acts_in:
-            n = ids("act", act)
-            b.append(f"    {n}[{ql(act)}]")
-            if all(is_hyp(r) for r in acts[act]):
+        for k in acts_in:
+            n = ids("act", k)
+            b.append(f"    {n}[{ql(k[1])}]")
+            if all(is_hyp(r) for r in acts[k]):
                 hyps.append(n)
         b.append("  end")
-    names = list(acts)
-    for a, nxt in zip(names, names[1:]):
-        b.append(f"  {ids('act', a)} --> {ids('act', nxt)}")
+    lines = []
+    for a, z in edges:
+        if a in acts and z in acts:
+            lines.append(f"  {ids('act', a)} --> {ids('act', z)}")
+        elif a in acts:
+            lines.append(f"  {ids('act', a)} --> {ids('to', z[0])}([{ql(f'BUC「{z[0]}」へ')}])")
+        elif z in acts:
+            lines.append(f"  {ids('from', a[0])}([{ql(f'BUC「{a[0]}」から')}]) --> {ids('act', z)}")
+    b += dict.fromkeys(lines)
     b.append("  " + HYP_STYLE)
     if hyps:
         b.append(f"  class {','.join(hyps)} hyp")
@@ -859,9 +921,13 @@ def build_diagrams(d):
     if m.bucs:
         out += ["## ビジネスコンテキスト", "", diagram_business_context(m)]
         out += ["## 業務フロー", ""]
+        for g in m.groups():
+            out += [f"### {g}", ""]
+            out += [diagram_flow(m, g)] if m.flow(g)[0] else ["アクティビティがまだない。", ""]
+        out += ["## BUCごとのアクティビティ", ""]
         for (g, buc), rows in m.bucs.items():
             out += [f"### {g} / {buc}", ""]
-            out += [diagram_flow(rows)] if activities(rows) else ["アクティビティがまだない。", ""]
+            out += [diagram_flow(m, g, buc)] if activities(rows) else ["アクティビティがまだない。", ""]
     if m.ucs:
         out += ["## UC複合図", ""]
         for uc in m.ucs:
@@ -1643,6 +1709,8 @@ def build_prd(d):
     for g, bucs in by_g.items():
         html += f'<h3>{e(g)}</h3>'
         html += prd_figure(prd_overall_flow(m, g), "BUCと、関わるアクター・外部システム。点線は仮説のつながり")
+        if m.flow(g)[0]:
+            html += prd_figure(diagram_flow(m, g, wrap=4), f"{g}の業務フロー。アクティビティを担当ごとの枠に置き、流れの順に矢印でつないだもの")
         for buc, rows in bucs:
             steps = []
             for r in rows:
@@ -1686,14 +1754,14 @@ def build_prd(d):
                 li += (f'<li><div class="step-h"><span class="step-name">{e(s["name"])}</span>'
                        f'{chips(s["who"], "chip who")}</div>{extra}</li>')
             key = f"buc-{buc}"
-            fig = prd_figure(diagram_flow(rows, wrap=4)) if steps else ""
+            fig = prd_figure(diagram_flow(m, g, buc, wrap=4)) if steps else ""
             html += (f'<div class="flow"><div class="flow-h"><b>{e(buc)}</b>'
                      f'<span class="sub">{chips(reqids, "chip req")}</span></div>{fig}'
                      f'<details class="more"><summary>アクティビティごとの詳細</summary>'
                      f'<ol class="steps">{li or "<li class=none>まだアクティビティがありません</li>"}</ol></details>{memo(key, buc)}</div>')
     section("flows", "業務フロー", html or '<p class="none">まだありません</p>',
             ("最初の図は、業務ごとにどのアクター・外部システムが関わるかを示しています。" if multi_g else "")
-            + "業務ごとに、BUCと関わるアクター・外部システムの図、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。"
+            + "業務ごとに、BUCと関わるアクター・外部システムの図、業務全体のアクティビティの流れ(業務フロー)、BUCごとのアクティビティの流れの順に並べています。アクティビティ名の横の色付きのラベルは、そのアクティビティをするアクター・外部システムです。"
             "アクティビティごとの詳細の図では、情報・条件・状態モデルをクリックすると中身が見られます。")
 
     # 5. 情報

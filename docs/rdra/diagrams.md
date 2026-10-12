@@ -206,6 +206,183 @@ flowchart LR
 
 ## 業務フロー
 
+### 会員管理
+
+```mermaid
+flowchart TB
+  subgraph l1["顧客"]
+    act2["会員情報を登録する"]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act2 hyp
+```
+
+### オーダー業務
+
+```mermaid
+flowchart TB
+  subgraph l1["顧客"]
+    act2["購入する商品を選ぶ"]
+    act3["カートに追加する"]
+    act4["購入指示を行う"]
+    act5["決済情報と送付先の情報を入力する"]
+    act6["オーダーの状態を確認する"]
+    act7["ABC商事からのメールを確認する"]
+    act8["選択した決済方法に従って支払う"]
+    act9["オーダーをキャンセルする"]
+  end
+  subgraph l10["オーダー部門"]
+    act11["オーダーを確認する"]
+    act12["受理と支払い方法を顧客にメールで通知する"]
+    act13["オーダー別の在庫を確認する"]
+    act14["在庫切れのオーダーを入荷待ちにする"]
+    act15["出荷指示を行う"]
+    act16["出荷指示を行う"]
+    act17["配送会社からの配送終了のメール通知を確認する"]
+    act18["オーダーを完了する"]
+    act19["入金済みの代金を返金する"]
+    act20["照合できない入金を確認する"]
+    act21["顧客と差額を確認する"]
+    act22["不足分の追加支払いを依頼する"]
+    act23["過多分を返金する"]
+    act24["返品をメールもしくは電話で受け付ける"]
+    act25["返品された代金を返金する"]
+  end
+  subgraph l26["決済システム"]
+    act27["入金情報通知を受けてオーダーと照合する"]
+  end
+  subgraph l28["入荷システム"]
+    act29["入荷待ちのオーダーの入荷待ちを解除する"]
+  end
+  subgraph l30["物流"]
+    act31["返品された商品を在庫に戻す"]
+  end
+  act2 --> act3
+  act3 --> act4
+  act4 --> act5
+  act5 --> act11
+  act11 --> act12
+  act12 --> act7
+  act7 --> act8
+  act8 --> act27
+  act27 --> act13
+  act27 --> act20
+  act13 --> act14
+  act13 --> act15
+  act14 --> act29
+  act15 --> act17
+  act29 --> act16
+  act16 --> act17
+  act17 --> act18
+  act9 --> act19
+  act20 --> act21
+  act21 --> act22
+  act21 --> act23
+  act22 --> act13
+  act23 --> act13
+  act24 --> act25
+  act25 --> act31
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act19,act22,act23,act25,act31 hyp
+```
+
+### 出荷業務
+
+```mermaid
+flowchart TB
+  subgraph l1["物流"]
+    act2["締め毎に出荷作業を行う"]
+  end
+  subgraph l3["出荷システム"]
+    act4["出荷作業の完了を通知する"]
+    act5["出荷した商品を在庫から引く"]
+  end
+  act2 --> act4
+  act4 --> act5
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+```
+
+### 発注業務
+
+```mermaid
+flowchart TB
+  subgraph l1["オーダー部門"]
+    act2["取引先に追加発注する"]
+  end
+  subgraph l3["営業"]
+    act4["取引先に新規商品を発注する"]
+  end
+  subgraph l5["物流"]
+    act6["入荷情報を入荷システムに入力する"]
+  end
+  subgraph l7["入荷システム"]
+    act8["入荷情報を発注と突き合わせる"]
+    act9["入荷した商品を在庫に加える"]
+  end
+  act2 --> act6
+  act4 --> act6
+  act6 --> act8
+  act8 --> act9
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+```
+
+### 商品管理
+
+```mermaid
+flowchart TB
+  subgraph l1["営業"]
+    act2["取り扱い商品を登録する"]
+    act3["取り扱い商品を削除する"]
+    act4["今後追加発注しない商品をマークする"]
+    act5["売れ筋商品の在庫量を多くする"]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+```
+
+### 商品企画
+
+```mermaid
+flowchart TB
+  subgraph l1["営業"]
+    act2["売上を週単位・月単位で集計する"]
+    act3["売れた場所をマップ上で見る"]
+    act4["売上情報を場所と商品の特性で分析する"]
+    act5["次週以降の商品の品揃えを検討する"]
+  end
+  act2 --> act3
+  act3 --> act4
+  act4 --> act5
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+```
+
+### 売上の把握
+
+```mermaid
+flowchart TB
+  subgraph l1["経営者"]
+    act2["売上の状況を見る"]
+  end
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act2 hyp
+```
+
+### 顧客の声の把握
+
+```mermaid
+flowchart TB
+  subgraph l1["顧客"]
+    act2["購入した商品のレビュー・感想を投稿する"]
+  end
+  subgraph l3["営業"]
+    act4["商品ごとにレビュー・感想を集計する"]
+    act5["商品開発を検討する"]
+  end
+  act4 --> act5
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+```
+
+## BUCごとのアクティビティ
+
 ### 会員管理 / 会員登録する
 
 ```mermaid
@@ -231,7 +408,7 @@ flowchart TB
   act2 --> act3
   act3 --> act4
   act4 --> act5
-  act5 --> act6
+  act5 --> to7(["BUC「オーダーを受理する」へ"])
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
@@ -243,7 +420,9 @@ flowchart TB
     act2["オーダーを確認する"]
     act3["受理と支払い方法を顧客にメールで通知する"]
   end
+  from4(["BUC「注文を受け付ける」から"]) --> act2
   act2 --> act3
+  act3 --> to5(["BUC「入金を確認して出荷を指示する」へ"])
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
@@ -263,11 +442,16 @@ flowchart TB
     act8["在庫切れのオーダーを入荷待ちにする"]
     act9["出荷指示を行う"]
   end
+  from10(["BUC「オーダーを受理する」から"]) --> act2
   act2 --> act3
   act3 --> act5
   act5 --> act7
+  act5 --> to11(["BUC「入金差異を解消する」へ"])
   act7 --> act8
-  act8 --> act9
+  act7 --> act9
+  act8 --> to12(["BUC「入荷したオーダーの出荷を指示する」へ"])
+  act9 --> to13(["BUC「配送終了を確認してオーダーを完了する」へ"])
+  from14(["BUC「入金差異を解消する」から"]) --> act7
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
@@ -281,7 +465,9 @@ flowchart TB
   subgraph l3["オーダー部門"]
     act4["出荷指示を行う"]
   end
+  from5(["BUC「入金を確認して出荷を指示する」から"]) --> act2
   act2 --> act4
+  act4 --> to6(["BUC「配送終了を確認してオーダーを完了する」へ"])
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
@@ -293,6 +479,8 @@ flowchart TB
     act2["配送会社からの配送終了のメール通知を確認する"]
     act3["オーダーを完了する"]
   end
+  from4(["BUC「入金を確認して出荷を指示する」から"]) --> act2
+  from5(["BUC「入荷したオーダーの出荷を指示する」から"]) --> act2
   act2 --> act3
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
@@ -322,10 +510,14 @@ flowchart TB
     act4["不足分の追加支払いを依頼する"]
     act5["過多分を返金する"]
   end
+  from6(["BUC「入金を確認して出荷を指示する」から"]) --> act2
   act2 --> act3
   act3 --> act4
-  act4 --> act5
+  act3 --> act5
+  act4 --> to7(["BUC「入金を確認して出荷を指示する」へ"])
+  act5 --> to7(["BUC「入金を確認して出荷を指示する」へ"])
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class act4,act5 hyp
 ```
 
 ### オーダー業務 / 返品を受け付ける
@@ -368,6 +560,7 @@ flowchart TB
   subgraph l1["オーダー部門"]
     act2["取引先に追加発注する"]
   end
+  act2 --> to3(["BUC「入荷を発注と突き合わせる」へ"])
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
@@ -378,6 +571,7 @@ flowchart TB
   subgraph l1["営業"]
     act2["取引先に新規商品を発注する"]
   end
+  act2 --> to3(["BUC「入荷を発注と突き合わせる」へ"])
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
@@ -392,6 +586,8 @@ flowchart TB
     act4["入荷情報を発注と突き合わせる"]
     act5["入荷した商品を在庫に加える"]
   end
+  from6(["BUC「在庫切れの商品を追加発注する」から"]) --> act2
+  from7(["BUC「新規商品を発注する」から"]) --> act2
   act2 --> act4
   act4 --> act5
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
@@ -405,7 +601,6 @@ flowchart TB
     act2["取り扱い商品を登録する"]
     act3["取り扱い商品を削除する"]
   end
-  act2 --> act3
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
 ```
 
