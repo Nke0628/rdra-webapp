@@ -452,14 +452,15 @@ stateDiagram-v2
   state "受理済" as s2
   state "入金待ち" as s3
   state "入金確認済" as s4
-  state "入荷待ち" as s5
-  state "出荷指示済" as s6
-  state "出荷済" as s7
-  state "完了" as s8
-  state "キャンセル済" as s9
-  state "返品受付済" as s10
+  state "入金差異あり" as s5
+  state "入荷待ち" as s6
+  state "出荷指示済" as s7
+  state "出荷済" as s8
+  state "完了" as s9
+  state "キャンセル済" as s10
+  state "返品受付済" as s11
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
-  class s1,s3 hyp
+  class s1,s3,s5 hyp
 ```
 
 ### 商品状態
@@ -479,4 +480,24 @@ stateDiagram-v2
   state "入荷済" as s2
   classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
   class s2 hyp
+```
+
+### 出荷指示状態
+
+```mermaid
+stateDiagram-v2
+  state "指示済" as s1
+  state "出荷済" as s2
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class s1,s2 hyp
+```
+
+### 顧客状態
+
+```mermaid
+stateDiagram-v2
+  state "非会員" as s1
+  state "会員" as s2
+  classDef hyp stroke-dasharray:5 5,stroke:#d97706,color:#92400e
+  class s1,s2 hyp
 ```
